@@ -149,4 +149,44 @@ final class WindowFocuserTests: XCTestCase {
         XCTAssertEqual(FocusResult.appOnlyActivated, FocusResult.appOnlyActivated)
         XCTAssertNotEqual(FocusResult.fullSuccess, FocusResult.appOnlyActivated)
     }
+
+    // MARK: - FocusAckResponse JSON round-trip (Spec-02 §3 계약 검증)
+
+    func test_focusAckJSON_matchesSpecFormat_success() {
+        // Spec-02 §3: {"type":"ack","action":"focus","ok":true}
+        let json = formatFocusAckJSON(ok: true)
+        let data = json.data(using: .utf8)!
+        let dict = try! JSONSerialization.jsonObject(with: data) as! [String: Any]
+        XCTAssertEqual(dict["type"] as? String, "ack")
+        XCTAssertEqual(dict["action"] as? String, "focus")
+        XCTAssertEqual(dict["ok"] as? Bool, true)
+        // error 키는 없거나 null
+        XCTAssertTrue(dict["error"] == nil || dict["error"] is NSNull)
+    }
+
+    func test_focusAckJSON_matchesSpecFormat_failure() {
+        // Spec-02 §3: {"type":"ack","action":"focus","ok":false,"error":"window not found"}
+        let json = formatFocusAckJSON(ok: false, error: "window not found")
+        let data = json.data(using: .utf8)!
+        let dict = try! JSONSerialization.jsonObject(with: data) as! [String: Any]
+        XCTAssertEqual(dict["type"] as? String, "ack")
+        XCTAssertEqual(dict["action"] as? String, "focus")
+        XCTAssertEqual(dict["ok"] as? Bool, false)
+        XCTAssertEqual(dict["error"] as? String, "window not found")
+    }
+
+    // MARK: - Error scenarios via focusErrorMessage mapping
+
+    func test_allFocusErrors_haveMessages() {
+        // 모든 에러 타입이 유의미한 메시지를 가지는지 확인
+        let errors: [FocusError] = [
+            .windowNotFound(windowId: 1),
+            .processDead(pid: 1),
+            .axPermissionDenied,
+        ]
+        for error in errors {
+            let message = focusErrorMessage(for: error)
+            XCTAssertFalse(message.isEmpty, "Error message should not be empty for \(error)")
+        }
+    }
 }

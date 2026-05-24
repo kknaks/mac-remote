@@ -221,5 +221,37 @@ public enum WindowFocuser {
             return .appOnlyActivated
         }
     }
+
+    // MARK: - Task 4: Focus with ack response (Spec-02 §3 + §5)
+
+    /// focus()를 실행하고 결과를 FocusAckResponse JSON으로 반환
+    /// 모든 에러를 잡아 ack:false 응답으로 변환
+    /// - Parameters:
+    ///   - windowId: 대상 창의 kCGWindowNumber
+    ///   - windows: 현재 창 목록
+    /// - Returns: JSON 문자열 (Spec-02 §3 형식)
+    public static func focusWithAck(windowId: Int, windows: [WindowInfo]) -> String {
+        // Spec-02 §6: windowId 유효성 검증 — 양의 정수
+        guard windowId > 0 else {
+            return formatFocusAckJSON(ok: false, error: "invalid windowId")
+        }
+
+        do {
+            let result = try focus(windowId: windowId, windows: windows)
+            // Spec-02 §4: AX 실패해도 ok:true (graceful degradation)
+            switch result {
+            case .fullSuccess:
+                return formatFocusAckJSON(ok: true)
+            case .appOnlyActivated:
+                // Spec-02 §4: AX 실패해도 앱은 활성화됨 → ok:true
+                return formatFocusAckJSON(ok: true)
+            }
+        } catch let error as FocusError {
+            let message = focusErrorMessage(for: error)
+            return formatFocusAckJSON(ok: false, error: message)
+        } catch {
+            return formatFocusAckJSON(ok: false, error: error.localizedDescription)
+        }
+    }
 }
 #endif
