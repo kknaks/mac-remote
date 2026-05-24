@@ -104,6 +104,9 @@ mac-remote/
 │       ├── MacHelperTests.swift       ← 통합 테스트
 │       ├── ModelsTests.swift          ← 모델 테스트
 │       ├── WindowManagerTests.swift   ← 창 관리 테스트
+│       ├── WindowFocuserTests.swift   ← 창 활성화 테스트
+│       ├── KeySenderTests.swift       ← 키 입력 테스트
+│       ├── IconExtractorTests.swift   ← 앱 아이콘 테스트
 │       ├── PermissionCheckerTests.swift ← 권한 확인 테스트
 │       ├── PermissionGuideTests.swift ← 권한 안내 테스트
 │       └── JSONOutputTests.swift      ← JSON 출력 테스트
