@@ -19,10 +19,7 @@ struct WindowListView: View {
                 ConnectionStatusHeader()
 
                 Group {
-                    if !wsManager.isConnected {
-                        // 연결 끊김 상태
-                        disconnectedView
-                    } else if wsManager.windows.isEmpty {
+                    if wsManager.windows.isEmpty {
                         // 빈 목록 (Spec-01 §9 엣지 케이스 #1)
                         emptyStateView
                     } else {
@@ -32,6 +29,8 @@ struct WindowListView: View {
                 }
                 .frame(maxHeight: .infinity)
             }
+            // 미연결 오버레이 (Work-13 Task 4)
+            .disconnectedOverlay()
             .navigationTitle("창 목록")
             .onChange(of: wsManager.appIcons) { _, newIcons in
                 updateIconCache(from: newIcons)
@@ -78,23 +77,6 @@ struct WindowListView: View {
                 .font(.title3)
                 .foregroundStyle(.secondary)
             Text("Mac에서 앱을 열면 여기에 표시됩니다.")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    // MARK: - Disconnected State
-
-    private var disconnectedView: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "wifi.slash")
-                .font(.system(size: 48))
-                .foregroundStyle(.red.opacity(0.6))
-            Text("Mac에 연결되지 않았습니다")
-                .font(.title3)
-                .foregroundStyle(.secondary)
-            Text("설정 탭에서 Mac에 연결하세요.")
                 .font(.caption)
                 .foregroundStyle(.tertiary)
         }

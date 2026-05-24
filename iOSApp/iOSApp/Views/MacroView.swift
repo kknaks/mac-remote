@@ -68,6 +68,8 @@ struct MacroView: View {
                     .padding(16)
                 }
             }
+            // 미연결 오버레이 (Work-13 Task 4)
+            .disconnectedOverlay()
             .navigationTitle("매크로")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
