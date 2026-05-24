@@ -155,4 +155,97 @@ final class WebSocketManager: ObservableObject {
         webSocketTask?.cancel(with: .goingAway, reason: nil)
         webSocketTask = nil
     }
+
+    // MARK: - Receive Loop (Spec-05 §3, §4)
+
+    /// 재귀적 메시지 수신 루프
+    /// URLSessionWebSocketTask.receive()는 1회성이므로 재귀 호출로 연속 수신
+    private func startReceiveLoop() {
+        webSocketTask?.receive { [weak self] result in
+            guard let self = self else { return }
+
+            switch result {
+            case .success(let message):
+                self.handleReceivedMessage(message)
+                // 다음 메시지 대기 (재귀)
+                self.startReceiveLoop()
+
+            case .failure(let error):
+                print("[ERROR] Connection lost: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.handleConnectionLost()
+                }
+            }
+        }
+    }
+
+    /// 수신된 WebSocket 메시지 처리
+    /// - Parameter message: URLSessionWebSocketTask.Message (.string 또는 .data)
+    private func handleReceivedMessage(_ message: URLSessionWebSocketTask.Message) {
+        let text: String
+
+        switch message {
+        case .string(let str):
+            text = str
+        case .data(let data):
+            guard let str = String(data: data, encoding: .utf8) else {
+                print("[ERROR] Failed to decode binary message as UTF-8")
+                return
+            }
+            text = str
+        @unknown default:
+            print("[ERROR] Unknown message type received")
+            return
+        }
+
+        // type 필드로 분기 (Spec-05 §3-1)
+        guard let data = text.data(using: .utf8) else {
+            print("[ERROR] JSON decode failed: invalid UTF-8")
+            return
+        }
+
+        do {
+            let header = try JSONDecoder().decode(ServerMessageHeader.self, from: data)
+            guard let messageType = ServerMessageType(rawValue: header.type) else {
+                print("[ERROR] Unknown server message type: \(header.type)")
+                return
+            }
+
+            switch messageType {
+            case .windowList:
+                let response = try JSONDecoder().decode(WindowListResponse.self, from: data)
+                DispatchQueue.main.async { [weak self] in
+                    self?.windows = response.windows
+                }
+
+            case .appIcons:
+                let response = try JSONDecoder().decode(AppIconsResponse.self, from: data)
+                DispatchQueue.main.async { [weak self] in
+                    // 기존 아이콘에 merge (새 앱만 추가)
+                    self?.appIcons.merge(response.icons) { _, new in new }
+                }
+
+            case .permissions:
+                let response = try JSONDecoder().decode(PermissionResponse.self, from: data)
+                DispatchQueue.main.async { [weak self] in
+                    self?.permissions = response
+                }
+
+            case .ack:
+                let response = try JSONDecoder().decode(AckResponse.self, from: data)
+                DispatchQueue.main.async { [weak self] in
+                    self?.lastAck = response
+                }
+            }
+        } catch {
+            print("[ERROR] JSON decode failed: \(error.localizedDescription)")
+        }
+    }
+
+    /// 연결 끊김 처리 (Spec-05 §4, §5)
+    private func handleConnectionLost() {
+        guard !isManualDisconnect else { return }
+        cleanupConnection()
+        attemptReconnect()
+    }
 }
