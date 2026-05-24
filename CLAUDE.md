@@ -97,7 +97,8 @@ mac-remote/
 │   │       ├── PermissionChecker.swift ← 권한 확인 (AXIsProcessTrusted)
 │   │       ├── PermissionGuide.swift  ← 권한 안내 메시지
 │   │       ├── JSONOutput.swift       ← JSON 콘솔 출력
-│   │       ├── WebSocketServer.swift  ← WS 서버 + 메시지 라우팅 (Swifter)
+│   │       ├── WebSocketServer.swift  ← WS 서버 (Swifter)
+│   │       ├── MessageHandler.swift  ← 메시지 파싱 + 액션 라우팅
 │   │       ├── QRGenerator.swift      ← QR 코드 생성 (CIFilter)
 │   │       └── MenuBarApp.swift       ← 앱 엔트리 (MenuBarExtra)
 │   └── Tests/
@@ -109,7 +110,9 @@ mac-remote/
 │       ├── IconExtractorTests.swift   ← 앱 아이콘 테스트
 │       ├── PermissionCheckerTests.swift ← 권한 확인 테스트
 │       ├── PermissionGuideTests.swift ← 권한 안내 테스트
-│       └── JSONOutputTests.swift      ← JSON 출력 테스트
+│       ├── JSONOutputTests.swift      ← JSON 출력 테스트
+│       ├── MessageHandlerTests.swift ← 메시지 핸들러 테스트
+│       └── WebSocketServerTests.swift ← WS 서버 테스트
 ├── iOSApp/                            ← iPhone 앱 (SwiftUI, iOS 17+)
 │   ├── iOSApp.xcodeproj
 │   └── iOSApp/
