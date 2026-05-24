@@ -26,9 +26,9 @@ Mac 헬퍼(실행기) + iOS 앱(리모컨), WebSocket(JSON) 통신.
 ## 문서 흐름 (파이프라인)
 
 ```
-Decision ──► Spec ──► Work
-    │           │
-    └───────────┴──► Architecture
+Decision ──► Spec ──► Work ──► /work-run (TDD 구현)
+    │           │                    │
+    └───────────┴──► Architecture    └──► Work 갱신 (상태 + 커밋 해시)
 ```
 
 1. **Decision** 먼저: 프로젝트의 WHY, 제약, 기술 선택을 확정한다.
@@ -51,12 +51,14 @@ Decision ──► Spec ──► Work
 | 3 | `/doc-work` | Work 템플릿 + 관련 Spec만 | `doc/Work.md` + `doc/work/Work-NN-slug.md` |
 | 4 | `/doc-arch` | Arch 템플릿 + Decision + Spec 인덱스 | `doc/Architecture.md` |
 | — | `/doc-status` | Spec.md + Work.md 인덱스만 | 없음 (현황 보고만) |
+| 5 | `/work-run` | Work-detail + 관련 Spec만 | 코드 구현 + Work-detail·인덱스 갱신 |
 
 ### 사용 규칙
 
 - 문서를 처음 만들 때: 파이프라인 순서대로 (Decision → Spec → Work → Architecture)
 - 기존 문서 업데이트: 해당 스킬만 호출
 - 현황 파악: `/doc-status`로 인덱스만 읽고 보고
+- 구현: `/work-run`으로 TDD 사이클 (RED → GREEN → REFACTOR → COMMIT)
 - **스킬이 지정하지 않은 문서는 읽지 않는다** — 컨텍스트 낭비 방지
 
 ---
@@ -88,5 +90,6 @@ mac-remote/
         ├── doc-spec/SKILL.md
         ├── doc-work/SKILL.md
         ├── doc-arch/SKILL.md
-        └── doc-status/SKILL.md
+        ├── doc-status/SKILL.md
+        └── work-run/SKILL.md
 ```
