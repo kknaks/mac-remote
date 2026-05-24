@@ -19,7 +19,24 @@ public struct ClientMessage: Codable, Equatable {
 
 // MARK: - Server Message Models (Spec-05 §2)
 
-/// 에러 ack 응답 (UNKNOWN_ACTION, INVALID_JSON)
+/// 통합 ack 응답 모델 (Spec-05 §2)
+/// 모든 ack 응답은 이 모델을 사용한다.
+/// type: "ack", action: 어떤 액션에 대한 응답인지, ok: 성공 여부, error: 실패 시 에러 메시지
+public struct AckResponse: Codable, Equatable {
+    public let type: String
+    public let action: String
+    public let ok: Bool
+    public let error: String?
+
+    public init(action: String, ok: Bool, error: String? = nil) {
+        self.type = "ack"
+        self.action = action
+        self.ok = ok
+        self.error = error
+    }
+}
+
+/// 에러 ack 응답 (UNKNOWN_ACTION, INVALID_JSON) — 하위 호환용
 public struct ErrorAckResponse: Codable, Equatable {
     public let type: String
     public let action: String
@@ -32,6 +49,21 @@ public struct ErrorAckResponse: Codable, Equatable {
         self.ok = false
         self.error = error
     }
+}
+
+/// 통합 ack 응답 JSON 인코딩 (Spec-05 §2)
+public func encodeAckJSON(action: String, ok: Bool, error: String? = nil) -> String {
+    let response = AckResponse(action: action, ok: ok, error: error)
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.sortedKeys]
+    guard let data = try? encoder.encode(response),
+          let json = String(data: data, encoding: .utf8) else {
+        if let error = error {
+            return #"{"action":"\#(action)","error":"\#(error)","ok":false,"type":"ack"}"#
+        }
+        return #"{"action":"\#(action)","ok":\#(ok),"type":"ack"}"#
+    }
+    return json
 }
 
 // MARK: - MessageHandler (Spec-05 §3)
@@ -93,16 +125,16 @@ public final class MessageHandler {
     /// focus 핸들러 (Task 5에서 구현)
     public func handleFocus(message: ClientMessage) -> String {
         guard let windowId = message.windowId else {
-            return encodeErrorAck(action: "focus", error: "missing windowId")
+            return encodeAckJSON(action: "focus", ok: false, error: "missing windowId")
         }
         guard windowId > 0 else {
-            return formatFocusAckJSON(ok: false, error: "invalid windowId")
+            return encodeAckJSON(action: "focus", ok: false, error: "invalid windowId")
         }
         #if canImport(AppKit)
         let windows = WindowManager.listWindows()
         return WindowFocuser.focusWithAck(windowId: windowId, windows: windows)
         #else
-        return formatFocusAckJSON(ok: true)
+        return encodeAckJSON(action: "focus", ok: true)
         #endif
     }
 
@@ -141,27 +173,13 @@ public final class MessageHandler {
         #endif
     }
 
-    // MARK: - Encoding helpers
+    // MARK: - Encoding helpers (통합 ack 사용)
 
     private func encodeErrorAck(action: String, error: String) -> String {
-        let response = ErrorAckResponse(action: action, error: error)
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.sortedKeys]
-        guard let data = try? encoder.encode(response),
-              let json = String(data: data, encoding: .utf8) else {
-            return #"{"type":"ack","action":"\#(action)","ok":false,"error":"\#(error)"}"#
-        }
-        return json
+        return encodeAckJSON(action: action, ok: false, error: error)
     }
 
     private func encodeKeyAck(ok: Bool, error: String? = nil) -> String {
-        let response = KeyAckResponse(ok: ok, error: error)
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.sortedKeys]
-        guard let data = try? encoder.encode(response),
-              let json = String(data: data, encoding: .utf8) else {
-            return #"{"type":"ack","action":"key","ok":false}"#
-        }
-        return json
+        return encodeAckJSON(action: "key", ok: ok, error: error)
     }
 }

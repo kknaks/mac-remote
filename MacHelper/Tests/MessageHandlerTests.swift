@@ -72,7 +72,67 @@ final class ClientMessageTests: XCTestCase {
     }
 }
 
-final class ErrorAckResponseTests: XCTestCase {
+final class AckResponseTests: XCTestCase {
+
+    // MARK: - Task 10: ack response format unification
+
+    func test_ackResponse_success_encodesCorrectly() throws {
+        let response = AckResponse(action: "focus", ok: true)
+        let data = try JSONEncoder().encode(response)
+        let json = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+
+        XCTAssertEqual(json["type"] as? String, "ack")
+        XCTAssertEqual(json["action"] as? String, "focus")
+        XCTAssertEqual(json["ok"] as? Bool, true)
+        // error should be nil/null for success
+    }
+
+    func test_ackResponse_failure_encodesWithError() throws {
+        let response = AckResponse(action: "key", ok: false, error: "unknown key: xyz")
+        let data = try JSONEncoder().encode(response)
+        let json = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+
+        XCTAssertEqual(json["type"] as? String, "ack")
+        XCTAssertEqual(json["action"] as? String, "key")
+        XCTAssertEqual(json["ok"] as? Bool, false)
+        XCTAssertEqual(json["error"] as? String, "unknown key: xyz")
+    }
+
+    func test_ackResponse_roundTrip() throws {
+        let original = AckResponse(action: "focus", ok: true, error: nil)
+        let data = try JSONEncoder().encode(original)
+        let decoded = try JSONDecoder().decode(AckResponse.self, from: data)
+        XCTAssertEqual(original, decoded)
+    }
+
+    func test_encodeAckJSON_success_format() {
+        let json = encodeAckJSON(action: "focus", ok: true)
+        let parsed = parseJSON(json)
+
+        XCTAssertEqual(parsed["type"] as? String, "ack")
+        XCTAssertEqual(parsed["action"] as? String, "focus")
+        XCTAssertEqual(parsed["ok"] as? Bool, true)
+    }
+
+    func test_encodeAckJSON_failure_format() {
+        let json = encodeAckJSON(action: "key", ok: false, error: "unknown key: xyz")
+        let parsed = parseJSON(json)
+
+        XCTAssertEqual(parsed["type"] as? String, "ack")
+        XCTAssertEqual(parsed["action"] as? String, "key")
+        XCTAssertEqual(parsed["ok"] as? Bool, false)
+        XCTAssertEqual(parsed["error"] as? String, "unknown key: xyz")
+    }
+
+    func test_encodeAckJSON_unknownAction_format() {
+        let json = encodeAckJSON(action: "badAction", ok: false, error: "UNKNOWN_ACTION")
+        let parsed = parseJSON(json)
+
+        XCTAssertEqual(parsed["type"] as? String, "ack")
+        XCTAssertEqual(parsed["action"] as? String, "badAction")
+        XCTAssertEqual(parsed["ok"] as? Bool, false)
+        XCTAssertEqual(parsed["error"] as? String, "UNKNOWN_ACTION")
+    }
 
     func test_errorAck_encodesCorrectly() throws {
         let response = ErrorAckResponse(action: "badAction", error: "UNKNOWN_ACTION")
@@ -83,6 +143,51 @@ final class ErrorAckResponseTests: XCTestCase {
         XCTAssertEqual(json["action"] as? String, "badAction")
         XCTAssertEqual(json["ok"] as? Bool, false)
         XCTAssertEqual(json["error"] as? String, "UNKNOWN_ACTION")
+    }
+
+    // MARK: - All ack responses have consistent fields
+
+    func test_allAckActions_haveConsistentFormat() {
+        let handler = MessageHandler()
+
+        // 각 action별 ack/에러 응답이 동일한 포맷을 따르는지 검증
+        let testCases: [(String, [String: Any])] = [
+            // focus ack
+            (handler.handleFocus(message: ClientMessage(action: "focus", windowId: 123)),
+             ["type": "ack", "action": "focus"]),
+            // key ack
+            (handler.handleKey(message: ClientMessage(action: "key", key: "c", modifiers: ["cmd"])),
+             ["type": "ack", "action": "key"]),
+            // unknown action ack
+            (handler.handle(#"{"action":"unknown"}"#),
+             ["type": "ack", "action": "unknown"]),
+            // focus error
+            (handler.handleFocus(message: ClientMessage(action: "focus", windowId: nil)),
+             ["type": "ack", "action": "focus"]),
+            // key error
+            (handler.handleKey(message: ClientMessage(action: "key", key: nil)),
+             ["type": "ack", "action": "key"]),
+        ]
+
+        for (jsonStr, expected) in testCases {
+            let parsed = parseJSON(jsonStr)
+            XCTAssertEqual(parsed["type"] as? String, expected["type"] as? String,
+                          "type mismatch in: \(jsonStr)")
+            XCTAssertEqual(parsed["action"] as? String, expected["action"] as? String,
+                          "action mismatch in: \(jsonStr)")
+            XCTAssertNotNil(parsed["ok"], "ok field missing in: \(jsonStr)")
+        }
+    }
+
+    // MARK: - Helper
+
+    private func parseJSON(_ string: String) -> [String: Any] {
+        guard let data = string.data(using: .utf8),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            XCTFail("Failed to parse JSON: \(string)")
+            return [:]
+        }
+        return json
     }
 }
 
