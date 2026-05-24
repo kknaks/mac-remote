@@ -126,4 +126,61 @@ final class WindowFilterTests: XCTestCase {
         let infos = convertToWindowInfos([], frontmostPID: nil)
         XCTAssertEqual(infos.count, 0)
     }
+
+    // MARK: - frontmost detection
+
+    func test_frontmost_matchingPID_isTrue() {
+        let entries = [
+            RawWindowEntry(windowNumber: 1, ownerName: "Safari", windowName: "Tab", ownerPID: 100, windowLayer: 0),
+            RawWindowEntry(windowNumber: 2, ownerName: "Xcode", windowName: "Project", ownerPID: 200, windowLayer: 0),
+        ]
+        let infos = convertToWindowInfos(entries, frontmostPID: 100)
+        XCTAssertTrue(infos[0].frontmost)
+        XCTAssertFalse(infos[1].frontmost)
+    }
+
+    func test_frontmost_noMatchingPID_allFalse() {
+        let entries = [
+            RawWindowEntry(windowNumber: 1, ownerName: "Safari", windowName: "Tab", ownerPID: 100, windowLayer: 0),
+            RawWindowEntry(windowNumber: 2, ownerName: "Xcode", windowName: "Project", ownerPID: 200, windowLayer: 0),
+        ]
+        let infos = convertToWindowInfos(entries, frontmostPID: 999)
+        XCTAssertFalse(infos[0].frontmost)
+        XCTAssertFalse(infos[1].frontmost)
+    }
+
+    func test_frontmost_nilPID_allFalse() {
+        let entries = [
+            RawWindowEntry(windowNumber: 1, ownerName: "Safari", windowName: "Tab", ownerPID: 100, windowLayer: 0),
+        ]
+        let infos = convertToWindowInfos(entries, frontmostPID: nil)
+        XCTAssertFalse(infos[0].frontmost)
+    }
+
+    func test_frontmost_multipleWindowsSamePID_onlyFirstIsTrue() {
+        // Spec-01 §2: frontmost는 목록 중 최대 1개만 true
+        let entries = [
+            RawWindowEntry(windowNumber: 1, ownerName: "Safari", windowName: "Tab 1", ownerPID: 100, windowLayer: 0),
+            RawWindowEntry(windowNumber: 2, ownerName: "Safari", windowName: "Tab 2", ownerPID: 100, windowLayer: 0),
+            RawWindowEntry(windowNumber: 3, ownerName: "Safari", windowName: "Tab 3", ownerPID: 100, windowLayer: 0),
+        ]
+        let infos = convertToWindowInfos(entries, frontmostPID: 100)
+        let frontmostCount = infos.filter { $0.frontmost }.count
+        XCTAssertEqual(frontmostCount, 1, "Only one window should be frontmost")
+        XCTAssertTrue(infos[0].frontmost)
+        XCTAssertFalse(infos[1].frontmost)
+        XCTAssertFalse(infos[2].frontmost)
+    }
+
+    func test_frontmost_mixedApps_onlyFrontmostAppFirstWindow() {
+        let entries = [
+            RawWindowEntry(windowNumber: 1, ownerName: "Xcode", windowName: "A", ownerPID: 200, windowLayer: 0),
+            RawWindowEntry(windowNumber: 2, ownerName: "Safari", windowName: "B", ownerPID: 100, windowLayer: 0),
+            RawWindowEntry(windowNumber: 3, ownerName: "Safari", windowName: "C", ownerPID: 100, windowLayer: 0),
+        ]
+        let infos = convertToWindowInfos(entries, frontmostPID: 100)
+        XCTAssertFalse(infos[0].frontmost)  // Xcode
+        XCTAssertTrue(infos[1].frontmost)   // Safari first window
+        XCTAssertFalse(infos[2].frontmost)  // Safari second window
+    }
 }

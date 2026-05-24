@@ -51,17 +51,40 @@ public func filterWindows(_ entries: [RawWindowEntry]) -> [RawWindowEntry] {
 
 /// 필터링된 RawWindowEntry → WindowInfo 변환
 /// frontmostPID: 현재 최전면 앱의 PID (nil이면 모두 false)
+/// Spec-01 §2: frontmost는 목록 중 최대 1개만 true
 public func convertToWindowInfos(_ entries: [RawWindowEntry], frontmostPID: Int?) -> [WindowInfo] {
+    var frontmostAssigned = false
     return entries.map { entry in
-        WindowInfo(
+        let isFrontmost: Bool
+        if !frontmostAssigned, let pid = frontmostPID, entry.ownerPID == pid {
+            isFrontmost = true
+            frontmostAssigned = true
+        } else {
+            isFrontmost = false
+        }
+        return WindowInfo(
             id: entry.windowNumber,
             app: entry.ownerName,
             title: entry.windowName ?? "",
             pid: entry.ownerPID,
-            frontmost: entry.ownerPID == frontmostPID && frontmostPID != nil
+            frontmost: isFrontmost
         )
     }
 }
+
+// MARK: - Frontmost PID detection (macOS only)
+
+#if canImport(AppKit)
+import AppKit
+
+/// NSWorkspace로 현재 최전면 앱의 PID를 가져온다 (Spec-01 §2)
+public func getFrontmostPID() -> Int? {
+    guard let app = NSWorkspace.shared.frontmostApplication else {
+        return nil
+    }
+    return Int(app.processIdentifier)
+}
+#endif
 
 // MARK: - WindowManager (macOS implementation)
 
@@ -72,6 +95,15 @@ import CoreGraphics
 public enum WindowManager {
 
     /// CGWindowListCopyWindowInfo로 현재 화면의 창 목록 수집
+    /// frontmostPID를 자동으로 감지한다.
+    /// - Returns: 필터링된 WindowInfo 배열, null 반환 시 빈 배열
+    public static func listWindows() -> [WindowInfo] {
+        let frontmostPID = getFrontmostPID()
+        return listWindows(frontmostPID: frontmostPID)
+    }
+
+    /// CGWindowListCopyWindowInfo로 현재 화면의 창 목록 수집
+    /// - Parameter frontmostPID: 최전면 앱 PID (테스트 주입용)
     /// - Returns: 필터링된 WindowInfo 배열, null 반환 시 빈 배열
     public static func listWindows(frontmostPID: Int?) -> [WindowInfo] {
         // CGWindowListCopyWindowInfo 호출
