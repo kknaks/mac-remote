@@ -50,8 +50,10 @@ Entity: VirtualKeyMap (정적 매핑 테이블)
 
 | 방향 | 이름 | 설명 |
 |------|------|------|
-| iOS → Mac | key | 키 입력 전송 |
-| Mac → iOS | ack (key) | 키 입력 결과 응답 |
+| iOS → Mac | key | 단발 키 입력 전송 (down + up) |
+| iOS → Mac | holdModifiers | modifier를 누른 상태로 유지 |
+| iOS → Mac | releaseModifiers | 유지 중인 modifier 모두 해제 |
+| Mac → iOS | ack (key / holdModifiers / releaseModifiers) | 결과 응답 |
 
 #### 요청 예시
 
@@ -63,6 +65,14 @@ Entity: VirtualKeyMap (정적 매핑 테이블)
 {"action":"key","key":"4","modifiers":["cmd","shift"]}
 ```
 
+```json
+{"action":"holdModifiers","modifiers":["cmd"]}
+```
+
+```json
+{"action":"releaseModifiers"}
+```
+
 #### 응답 예시
 
 ```json
@@ -72,6 +82,22 @@ Entity: VirtualKeyMap (정적 매핑 테이블)
 ```json
 {"type":"ack","action":"key","ok":false,"error":"unknown key: xyz"}
 ```
+
+```json
+{"type":"ack","action":"holdModifiers","ok":true}
+```
+
+```json
+{"type":"ack","action":"releaseModifiers","ok":true}
+```
+
+### 3-3. Hold 모드 동작
+
+- Mac 헬퍼는 **현재 유지(held) 중인 modifier 집합**을 상태로 보관한다.
+- `holdModifiers` 수신 시: 해당 modifier를 CGEvent flagsState에 추가 + held set에 추가. 이미 held면 무시.
+- `key` 수신 시: 요청의 `modifiers` ∪ held set 으로 flags를 구성하여 keyDown/keyUp 전송.
+- `releaseModifiers` 수신 시: held set 비우기 + 각 modifier에 대해 keyUp 이벤트 발행 (CGEvent로 modifier 가상 키코드 keyUp).
+- 클라이언트 연결이 끊기면 Mac 헬퍼는 **자동으로 releaseModifiers를 실행**한다 (안전장치, Spec-03 §9 #5 참조).
 
 ### 3-2. 공유 상수 / Enum
 
@@ -94,8 +120,10 @@ enum Modifier: String {
 
 ## 4. 상태 전이 (State Machine)
 
+### 4-1. 단발 키 입력 (action="key")
+
 ```
-[대기] ──(key 요청)──► [키코드 조회] ──(found)──► [이벤트 생성] ──► [keyDown 전송] ──► [keyUp 전송] ──► [ack:true]
+[대기] ──(key 요청)──► [키코드 조회] ──(found)──► [flags 합성] ──► [keyDown→keyUp] ──► [ack:true]
                             │
                          (not found)
                             ▼
@@ -105,11 +133,24 @@ enum Modifier: String {
 | 현재 상태 | 이벤트 | 다음 상태 | 액션 | 비고 |
 |-----------|--------|-----------|------|------|
 | 대기 | key 수신 | 키코드 조회 | VirtualKeyMap에서 조회 | |
-| 키코드 조회 | found | 이벤트 생성 | CGEvent 생성 + modifier flags 설정 | |
+| 키코드 조회 | found | flags 합성 | CGEvent flags = req.modifiers ∪ heldModifiers | |
 | 키코드 조회 | not found | ack:false | 에러 응답 | |
-| 이벤트 생성 | — | keyDown 전송 | event.post(tap: .cghidEventTap) | |
-| keyDown 전송 | — | keyUp 전송 | keyUp 이벤트 post | keyDown/keyUp 쌍 필수 |
-| keyUp 전송 | — | ack:true | 성공 응답 | |
+| flags 합성 | — | keyDown→keyUp | keyDown/keyUp 쌍 발행 | keyDown/keyUp 쌍 필수 |
+| keyDown→keyUp | — | ack:true | 성공 응답 | |
+
+### 4-2. Hold 모드 (heldModifiers 상태)
+
+```
+[heldModifiers={}] ──(holdModifiers)──► [heldModifiers⊕mods] ──(releaseModifiers / 연결끊김)──► [heldModifiers={}]
+```
+
+| 현재 상태 | 이벤트 | 다음 상태 | 액션 | 비고 |
+|-----------|--------|-----------|------|------|
+| heldModifiers={} | holdModifiers 수신 | heldModifiers⊕mods | 각 modifier keyDown 발행 | 중복 hold는 무시 |
+| heldModifiers≠{} | holdModifiers 수신 | heldModifiers⊕mods | 신규만 keyDown 발행 | 멱등 |
+| heldModifiers≠{} | key 수신 | (동일) | §4-1 흐름 + flags에 held set 포함 | held 유지 |
+| heldModifiers≠{} | releaseModifiers 수신 | heldModifiers={} | 각 modifier keyUp 발행 | |
+| heldModifiers≠{} | 클라이언트 연결 끊김 | heldModifiers={} | releaseModifiers와 동일 | 안전장치 |
 
 ---
 
@@ -188,6 +229,16 @@ enum Modifier: String {
 |------|--------|-----------|--------|
 | 매크로 실행 | 버튼 탭 | Mac에서 해당 키 조합 실행 | 햅틱 (성공 시) |
 | 매크로 추가 | "매크로 추가" 버튼 | 키 + modifier 선택 화면 | — |
+| Hold 모드 진입 | `holdMode:true` 매크로 길게 누름 | modifier hold + 초기 key 전송, hold 오버레이 표시 | 햅틱 |
+| Hold 중 다음/이전 | 오버레이의 ▶/◀ 탭 | 동일 key 또는 Shift+key 단발 전송 | 햅틱 |
+| Hold 종료 (선택) | 오버레이 ✓ 또는 손가락 떼기 | releaseModifiers 전송 | 햅틱 |
+| Hold 종료 (취소) | 오버레이 ✕ | Esc 단발 + releaseModifiers 전송 | 햅틱 |
+
+### Hold 모드 UI 컴포넌트 (iOS)
+
+매크로 모델에 `holdMode: Bool` 플래그 추가. true인 매크로는 길게 누르기 시 hold 오버레이가 뜬다.
+- 오버레이는 화면 중앙 모달, 4개 버튼: ◀ / ▶ / ✓ / ✕
+- 기본 프리셋 "앱전환"(⌘+Tab)에 `holdMode: true` 적용 권장
 
 ---
 
@@ -199,6 +250,10 @@ enum Modifier: String {
 | 2 | modifier만 있고 key가 빈 문자열 | UNKNOWN_KEY 에러 |
 | 3 | 같은 매크로 동시 2회 탭 | 2회 모두 전송 |
 | 4 | Mac이 잠금 화면일 때 | CGEvent 전송되나 효과 없음, ack:true |
+| 5 | Hold 중 클라이언트 연결 끊김 | Mac 헬퍼가 자동으로 releaseModifiers 실행 (안전장치) |
+| 6 | Hold 중 다른 매크로 단발 탭 | 단발 매크로의 modifiers ∪ held로 합성 발사. held 상태 유지 |
+| 7 | releaseModifiers 수신 시 held set이 비어있음 | ack:true (멱등) |
+| 8 | 두 번 연속 holdModifiers | 이미 held인 modifier는 무시, 신규만 keyDown |
 
 ---
 
@@ -210,6 +265,11 @@ enum Modifier: String {
 - [ ] 알 수 없는 key에 대해 ack:false가 반환된다
 - [ ] Accessibility 권한 없이 실행 시 ack:false + 권한 안내
 - [ ] JSON 요청/응답이 계약 형식을 따른다
+- [ ] holdModifiers 수신 시 modifier가 keyDown되고 heldModifiers에 추가된다
+- [ ] hold 중 key 수신 시 held set이 flags에 포함된다
+- [ ] releaseModifiers 수신 시 modifier keyUp이 발행되고 heldModifiers가 비워진다
+- [ ] 클라이언트 연결 끊김 시 자동 releaseModifiers가 실행된다
+- [ ] iOS에서 `holdMode:true` 매크로 길게 누르기 시 hold 오버레이가 뜨고 ◀/▶/✓/✕ 동작이 사양대로 동작한다
 
 ---
 
@@ -218,3 +278,4 @@ enum Modifier: String {
 | 날짜 | 변경 내용 | 작성자 |
 |------|-----------|--------|
 | 2026-05-24 | 최초 작성 | |
+| 2026-05-24 | Hold 모드 추가 — holdModifiers/releaseModifiers 액션, heldModifiers 상태, hold UI 컴포넌트 (Work-17) | |

@@ -8,7 +8,7 @@
 |------|-----------|----------|------|
 | Spec-01 | Work-01 | Partial | §3 계약은 Work-05에서 |
 | Spec-02 | Work-02 | Partial | §3 계약은 Work-05에서 |
-| Spec-03 | Work-03 | Partial | §3 계약은 Work-05에서 |
+| Spec-03 | Work-03, Work-17 | Full | §3 계약은 Work-05에서. Hold 모드는 Work-17 (Done) |
 | Spec-04 | Work-04 | Partial | §3 계약은 Work-05에서 |
 | Spec-05 | Work-05, Work-09 | Full | 서버(05)+클라이언트(09) |
 | Spec-06 | Work-01, Work-06 | Full | 확인(01)+메뉴바 안내(06) |
@@ -46,6 +46,7 @@
 | Work-14 | T1: 엔드투엔드 테스트 | | Backlog | | | Work-07, Work-13 | 전체 |
 | Work-15 | T2: 엣지 케이스 대응 | | Backlog | | | Work-14 | 전체 |
 | Work-16 | T3: 다듬기 | | Backlog | | | Work-15 | 전체 |
+| Work-17 | Hold 모드 (앱 스위처용) | | Done | 2026-05-24 | 2026-05-24 | Work-03, Work-05, Work-11 | Spec-03 (Hold 분기) |
 
 ### 의존 관계 다이어그램
 
@@ -85,6 +86,8 @@ Work-01 (CLI) ──► Work-02 (창 활성화)
 | 날짜 | 변경 내용 |
 |------|-----------|
 | 2026-05-24 | 최초 작성 — 16개 워크 등록 |
+| 2026-05-24 | Work-17 (Hold 모드) 추가 — Spec-03 Hold 모드 분기 구현용 |
+| 2026-05-24 | Work-17 완료 (Done) — 단위 테스트 13개 GREEN, iOS 빌드 SUCCEEDED, 실기기 수동 검증은 별도 |
 | 2026-05-24 | Work-01 완료 (Done) |
 | 2026-05-24 | Work-03 완료 (Done) |
 | 2026-05-24 | Work-04 완료 (Done) |
