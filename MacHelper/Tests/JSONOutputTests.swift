@@ -103,4 +103,44 @@ final class JSONOutputTests: XCTestCase {
         XCTAssertEqual(decoded.accessibility, true)
         XCTAssertEqual(decoded.screenRecording, true)
     }
+
+    // MARK: - formatAppIconsJSON (Spec-04 §3)
+
+    func test_formatAppIconsJSON_specFormat() throws {
+        let icons = ["Arc": "iVBORw0KGgo=", "Xcode": "AAAA"]
+        let jsonString = formatAppIconsJSON(icons)
+        let data = jsonString.data(using: .utf8)!
+        let json = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+
+        XCTAssertEqual(json["type"] as? String, "appIcons")
+        let iconsDict = json["icons"] as? [String: String]
+        XCTAssertNotNil(iconsDict)
+        XCTAssertEqual(iconsDict?["Arc"], "iVBORw0KGgo=")
+        XCTAssertEqual(iconsDict?["Xcode"], "AAAA")
+    }
+
+    func test_formatAppIconsJSON_emptyIcons_validJSON() throws {
+        let jsonString = formatAppIconsJSON([:])
+        let data = jsonString.data(using: .utf8)!
+        let json = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+
+        XCTAssertEqual(json["type"] as? String, "appIcons")
+        let iconsDict = json["icons"] as? [String: String]
+        XCTAssertEqual(iconsDict?.count, 0)
+    }
+
+    func test_formatAppIconsJSON_roundTrip() throws {
+        let icons = ["Terminal": "BBBB"]
+        let jsonString = formatAppIconsJSON(icons)
+        let data = jsonString.data(using: .utf8)!
+        let decoded = try JSONDecoder().decode(AppIconsResponse.self, from: data)
+
+        XCTAssertEqual(decoded.type, "appIcons")
+        XCTAssertEqual(decoded.icons["Terminal"], "BBBB")
+    }
+
+    func test_formatAppIconsJSON_isPrettyPrinted() {
+        let jsonString = formatAppIconsJSON(["App": "data"])
+        XCTAssertTrue(jsonString.contains("\n"))
+    }
 }

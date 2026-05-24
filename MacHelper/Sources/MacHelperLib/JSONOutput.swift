@@ -25,3 +25,15 @@ public func formatPermissionJSON(_ status: PermissionStatus) -> String {
     }
     return String(data: data, encoding: .utf8) ?? #"{"type":"permissions","accessibility":false,"screenRecording":false}"#
 }
+
+/// AppIconsResponse를 Spec-04 §3 형식의 JSON 문자열로 변환
+public func formatAppIconsJSON(_ icons: [String: String]) -> String {
+    let response = AppIconsResponse(icons: icons)
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+
+    guard let data = try? encoder.encode(response) else {
+        return #"{"type":"appIcons","icons":{}}"#
+    }
+    return String(data: data, encoding: .utf8) ?? #"{"type":"appIcons","icons":{}}"#
+}
