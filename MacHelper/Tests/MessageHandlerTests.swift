@@ -297,15 +297,38 @@ final class MessageHandlerTests: XCTestCase {
         }
     }
 
-    // MARK: getPermissions routing
+    // MARK: getPermissions routing (Task 7: Work-01 permissions connection)
 
     func test_handle_getPermissions_returnsPermissions() {
         let response = handler.handle(#"{"action":"getPermissions"}"#)
         let json = parseJSON(response)
 
+        // Spec-05 §3-1: permissions 응답 형식
         XCTAssertEqual(json["type"] as? String, "permissions")
         XCTAssertNotNil(json["accessibility"])
         XCTAssertNotNil(json["screenRecording"])
+    }
+
+    func test_handleGetPermissions_direct_returnsPermissionsType() {
+        let response = handler.handleGetPermissions()
+        let json = parseJSON(response)
+
+        XCTAssertEqual(json["type"] as? String, "permissions")
+        // Linux에서는 accessibility: false, screenRecording: false
+        XCTAssertEqual(json["accessibility"] as? Bool, false)
+        XCTAssertEqual(json["screenRecording"] as? Bool, false)
+    }
+
+    func test_handle_getPermissions_outputMatchesSpecFormat() {
+        // Spec-05 §3-1: {"type":"permissions","accessibility":bool,"screenRecording":bool}
+        let response = handler.handleGetPermissions()
+        let json = parseJSON(response)
+
+        // type 필드 필수
+        XCTAssertNotNil(json["type"])
+        // accessibility, screenRecording 필드 필수 (Bool 타입)
+        XCTAssertTrue(json["accessibility"] is Bool)
+        XCTAssertTrue(json["screenRecording"] is Bool)
     }
 
     // MARK: - Edge Cases (Spec-05 §9)
