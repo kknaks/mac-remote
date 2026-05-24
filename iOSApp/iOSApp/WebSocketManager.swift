@@ -307,4 +307,80 @@ final class WebSocketManager: ObservableObject {
     func sendGetPermissions() {
         sendMessage(ClientMessage(action: "getPermissions"))
     }
+
+    // MARK: - Auto Reconnect (Spec-05 §4, §5)
+
+    /// 재연결 시도 (최대 wsMaxReconnectAttempts회, wsReconnectDelay초 간격)
+    private func attemptReconnect() {
+        guard !isManualDisconnect else { return }
+
+        reconnectAttempts += 1
+
+        if reconnectAttempts > wsMaxReconnectAttempts {
+            print("[ERROR] Max reconnect attempts (\(wsMaxReconnectAttempts)) exceeded")
+            connectionState = .disconnected
+            reconnectAttempts = 0
+            return
+        }
+
+        print("[WARN] Reconnecting attempt \(reconnectAttempts)/\(wsMaxReconnectAttempts)")
+        connectionState = .reconnecting
+
+        // wsReconnectDelay초 후 재연결 시도
+        reconnectTimer = Timer.scheduledTimer(
+            withTimeInterval: wsReconnectDelay,
+            repeats: false
+        ) { [weak self] _ in
+            guard let self = self, !self.isManualDisconnect else { return }
+            self.connect(host: self.host, port: self.port)
+        }
+    }
+
+    /// 재연결 타이머 중지
+    private func stopReconnectTimer() {
+        reconnectTimer?.invalidate()
+        reconnectTimer = nil
+    }
+
+    /// 수동 재연결 (UI에서 호출)
+    /// reconnectAttempts를 초기화하고 즉시 재연결 시도
+    func manualReconnect() {
+        cleanupConnection()
+        stopReconnectTimer()
+        reconnectAttempts = 0
+        isManualDisconnect = false
+        connectionState = .disconnected
+        connect(host: host, port: port)
+    }
+
+    // MARK: - Heartbeat (Spec-05 §4, §5)
+
+    /// ping/pong 하트비트 시작 (wsHeartbeatInterval초 간격)
+    private func startHeartbeat() {
+        stopHeartbeat()
+        heartbeatTimer = Timer.scheduledTimer(
+            withTimeInterval: wsHeartbeatInterval,
+            repeats: true
+        ) { [weak self] _ in
+            self?.sendPing()
+        }
+    }
+
+    /// 하트비트 중지
+    private func stopHeartbeat() {
+        heartbeatTimer?.invalidate()
+        heartbeatTimer = nil
+    }
+
+    /// ping 전송 + pong 타임아웃 체크
+    private func sendPing() {
+        webSocketTask?.sendPing { [weak self] error in
+            if let error = error {
+                print("[ERROR] Heartbeat timeout: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self?.handleConnectionLost()
+                }
+            }
+        }
+    }
 }
