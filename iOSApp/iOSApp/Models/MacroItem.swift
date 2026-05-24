@@ -64,3 +64,22 @@ struct MacroItem: Codable, Equatable, Identifiable {
         self.isUserDefined = try container.decodeIfPresent(Bool.self, forKey: .isUserDefined) ?? false
     }
 }
+
+// MARK: - 기본 매크로 프리셋 (Spec-03 §8, §10)
+
+extension MacroItem {
+    /// 기본 매크로 프리셋 7개 (Work-11 Task 2)
+    /// ⌘C, ⌘V, ⌘Z, ⌘⇧Z, ⌘⇧4, ⌃⌘Q, ⌘⇥
+    static let defaults: [MacroItem] = [
+        MacroItem(name: "복사", key: "c", modifiers: ["cmd"], icon: "doc.on.doc"),
+        MacroItem(name: "붙여넣기", key: "v", modifiers: ["cmd"], icon: "doc.on.clipboard"),
+        MacroItem(name: "실행취소", key: "z", modifiers: ["cmd"], icon: "arrow.uturn.backward"),
+        MacroItem(name: "다시실행", key: "z", modifiers: ["cmd", "shift"], icon: "arrow.uturn.forward"),
+        MacroItem(name: "스크린샷", key: "4", modifiers: ["cmd", "shift"], icon: "camera.viewfinder"),
+        MacroItem(name: "화면잠금", key: "q", modifiers: ["ctrl", "cmd"], icon: "lock"),
+        MacroItem(name: "앱전환", key: "tab", modifiers: ["cmd"], icon: "rectangle.on.rectangle"),
+    ]
+
+    /// UserDefaults에 저장할 때 사용하는 키
+    static let userDefaultsKey = "userMacros"
+}
