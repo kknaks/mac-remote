@@ -139,7 +139,7 @@ final class MessageHandlerTests: XCTestCase {
         XCTAssertEqual(json["error"] as? String, "UNKNOWN_ACTION")
     }
 
-    // MARK: listWindows routing
+    // MARK: listWindows routing (Task 4: Work-01 connection)
 
     func test_handle_listWindows_returnsWindowList() {
         let response = handler.handle(#"{"action":"listWindows"}"#)
@@ -147,6 +147,17 @@ final class MessageHandlerTests: XCTestCase {
 
         XCTAssertEqual(json["type"] as? String, "windowList")
         XCTAssertNotNil(json["windows"])
+    }
+
+    func test_handleListWindows_direct_returnsWindowListType() {
+        let response = handler.handleListWindows()
+        let json = parseJSON(response)
+
+        // Spec-05 §3-1: windowList 응답 형식
+        XCTAssertEqual(json["type"] as? String, "windowList")
+        // Linux에서는 빈 배열
+        let windows = json["windows"] as? [[String: Any]]
+        XCTAssertNotNil(windows)
     }
 
     // MARK: focus routing
