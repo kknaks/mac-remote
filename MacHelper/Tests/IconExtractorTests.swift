@@ -106,6 +106,8 @@ final class IconExtractorTests: XCTestCase {
     }
 
     // MARK: - Task 4: Default icon fallback (Spec-04 §5 ICON_NOT_FOUND)
+    // 아이콘 추출 실패 시 시스템 기본 아이콘으로 대체 (Spec-04 §5)
+    // CLI 도구 등 아이콘 없는 앱에도 기본 아이콘 제공 (Spec-04 §9 #4)
 
     func test_defaultIconBase64_isNotEmpty() {
         XCTAssertFalse(defaultIconBase64.isEmpty)
@@ -114,6 +116,21 @@ final class IconExtractorTests: XCTestCase {
     func test_defaultIconBase64_isValidBase64() {
         let data = Data(base64Encoded: defaultIconBase64)
         XCTAssertNotNil(data)
+    }
+
+    func test_defaultIconBase64_decodedSize_isReasonable() {
+        // 기본 아이콘은 최소 1x1 PNG → 최소 크기
+        let data = Data(base64Encoded: defaultIconBase64)!
+        XCTAssertGreaterThan(data.count, 0)
+        // 1x1 PNG는 일반적으로 100바이트 이하
+        XCTAssertLessThan(data.count, 200)
+    }
+
+    func test_defaultIconBase64_isStable() {
+        // 기본 아이콘은 항상 같은 값을 반환 (상수)
+        let first = defaultIconBase64
+        let second = defaultIconBase64
+        XCTAssertEqual(first, second)
     }
 
     func test_defaultIconBase64_isValidPNG() {
