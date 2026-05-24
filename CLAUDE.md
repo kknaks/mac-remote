@@ -82,8 +82,35 @@ mac-remote/
 │   ├── Work.md
 │   ├── work/              ← 상세 워크플랜
 │   └── Architecture.md
-├── MacHelper/             ← Mac 헬퍼 (메뉴바 앱)
-├── iOSApp/                ← iPhone 앱 (SwiftUI)
+├── MacHelper/                         ← Mac 헬퍼 (메뉴바 앱, Swift Package)
+│   ├── Package.swift
+│   └── Sources/
+│       ├── Models.swift               ← 공유 모델 (WindowInfo, KeyCommand 등)
+│       ├── WindowManager.swift        ← 창 목록 수집 (CGWindowListCopyWindowInfo)
+│       ├── WindowFocuser.swift        ← 창 활성화 (PID + AXRaise)
+│       ├── KeySender.swift            ← 키 입력 전송 (CGEvent)
+│       ├── IconExtractor.swift        ← 앱 아이콘 추출 (NSWorkspace)
+│       ├── PermissionChecker.swift    ← 권한 확인 (AXIsProcessTrusted)
+│       ├── WebSocketServer.swift      ← WS 서버 + 메시지 라우팅 (Swifter)
+│       ├── QRGenerator.swift          ← QR 코드 생성 (CIFilter)
+│       └── MenuBarApp.swift           ← 앱 엔트리 (MenuBarExtra)
+├── iOSApp/                            ← iPhone 앱 (SwiftUI, iOS 17+)
+│   ├── iOSApp.xcodeproj
+│   └── iOSApp/
+│       ├── iOSAppApp.swift            ← 앱 엔트리
+│       ├── ContentView.swift          ← 3탭 TabView
+│       ├── WebSocketManager.swift     ← WS 클라이언트 (URLSessionWebSocketTask)
+│       ├── Views/
+│       │   ├── WindowListView.swift   ← 창 목록 탭
+│       │   ├── MacroView.swift        ← 매크로 탭
+│       │   └── SettingsView.swift     ← 설정 탭
+│       ├── Components/
+│       │   ├── WindowCardView.swift   ← 창 카드 컴포넌트
+│       │   ├── MacroButtonView.swift  ← 매크로 버튼
+│       │   └── StatusIndicator.swift  ← 연결 표시등
+│       └── Models/
+│           ├── Models.swift           ← 공유 모델
+│           └── MacroItem.swift        ← 매크로 모델
 └── .claude/
     └── skills/            ← 문서 파이프라인 스킬
         ├── doc-decision/SKILL.md
