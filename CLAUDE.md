@@ -87,6 +87,9 @@ mac-remote/
 │   ├── Sources/
 │   │   ├── MacHelper/
 │   │   │   └── main.swift             ← CLI 엔트리포인트
+│   │   ├── MacHelperApp/
+│   │   │   ├── MacHelperAppEntry.swift ← 메뉴바 앱 엔트리 (@main, MenuBarExtra)
+│   │   │   └── Info.plist             ← LSUIElement=true (Dock 숨김)
 │   │   └── MacHelperLib/
 │   │       ├── MacHelperLib.swift      ← 라이브러리 엔트리
 │   │       ├── Models.swift           ← 공유 모델 (WindowInfo, KeyCommand 등)
@@ -99,8 +102,12 @@ mac-remote/
 │   │       ├── JSONOutput.swift       ← JSON 콘솔 출력
 │   │       ├── WebSocketServer.swift  ← WS 서버 (Swifter)
 │   │       ├── MessageHandler.swift  ← 메시지 파싱 + 액션 라우팅
-│   │       ├── QRGenerator.swift      ← QR 코드 생성 (CIFilter)
-│   │       └── MenuBarApp.swift       ← 앱 엔트리 (MenuBarExtra)
+│   │       ├── AppState.swift         ← 메뉴바 앱 상태 모델
+│   │       ├── AppLifecycleManager.swift ← 앱 생명주기 관리
+│   │       ├── MenuBarApp.swift       ← 메뉴바 뷰 (MenuBarContentView)
+│   │       ├── NetworkInfo.swift      ← 로컬 IP 주소 조회
+│   │       ├── SystemSettingsOpener.swift ← 시스템 설정 열기
+│   │       └── QRGenerator.swift      ← QR 코드 생성 (CIFilter)
 │   └── Tests/
 │       ├── MacHelperTests.swift       ← 통합 테스트
 │       ├── ModelsTests.swift          ← 모델 테스트
@@ -112,7 +119,10 @@ mac-remote/
 │       ├── PermissionGuideTests.swift ← 권한 안내 테스트
 │       ├── JSONOutputTests.swift      ← JSON 출력 테스트
 │       ├── MessageHandlerTests.swift ← 메시지 핸들러 테스트
-│       └── WebSocketServerTests.swift ← WS 서버 테스트
+│       ├── WebSocketServerTests.swift ← WS 서버 테스트
+│       ├── AppStateTests.swift        ← 메뉴바 앱 상태 테스트
+│       ├── AppLifecycleManagerTests.swift ← 생명주기 관리 테스트
+│       └── SystemSettingsTests.swift  ← 시스템 설정 URL 테스트
 ├── iOSApp/                            ← iPhone 앱 (SwiftUI, iOS 17+)
 │   ├── iOSApp.xcodeproj
 │   └── iOSApp/
