@@ -14,17 +14,23 @@ struct WindowListView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if !wsManager.isConnected {
-                    // 연결 끊김 상태
-                    disconnectedView
-                } else if wsManager.windows.isEmpty {
-                    // 빈 목록 (Spec-01 §9 엣지 케이스 #1)
-                    emptyStateView
-                } else {
-                    // 창 목록 (Spec-01 §8: 카드형 리스트, 당겨서 새로고침)
-                    windowListContent
+            VStack(spacing: 0) {
+                // 연결 상태 헤더 (Work-13 Task 3)
+                ConnectionStatusHeader()
+
+                Group {
+                    if !wsManager.isConnected {
+                        // 연결 끊김 상태
+                        disconnectedView
+                    } else if wsManager.windows.isEmpty {
+                        // 빈 목록 (Spec-01 §9 엣지 케이스 #1)
+                        emptyStateView
+                    } else {
+                        // 창 목록 (Spec-01 §8: 카드형 리스트, 당겨서 새로고침)
+                        windowListContent
+                    }
                 }
+                .frame(maxHeight: .infinity)
             }
             .navigationTitle("창 목록")
             .onChange(of: wsManager.appIcons) { _, newIcons in

@@ -32,21 +32,26 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                // MARK: Section 1 — 연결 상태
-                connectionStatusSection
+            VStack(spacing: 0) {
+                // 연결 상태 헤더 (Work-13 Task 3)
+                ConnectionStatusHeader()
 
-                // MARK: Section 2 — 연결 설정 (QR 스캔 + 수동 입력)
-                connectionSection
+                Form {
+                    // MARK: Section 1 — 연결 상태
+                    connectionStatusSection
 
-                // MARK: Section 3 — 헬퍼 권한 상태
-                permissionsSection
+                    // MARK: Section 2 — 연결 설정 (QR 스캔 + 수동 입력)
+                    connectionSection
 
-                // MARK: Section 4 — 앱 설정
-                appSettingsSection
+                    // MARK: Section 3 — 헬퍼 권한 상태
+                    permissionsSection
 
-                // MARK: Section 5 — 앱 정보
-                appInfoSection
+                    // MARK: Section 4 — 앱 설정
+                    appSettingsSection
+
+                    // MARK: Section 5 — 앱 정보
+                    appInfoSection
+                }
             }
             .navigationTitle("설정")
             .onAppear {

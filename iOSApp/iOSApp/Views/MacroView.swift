@@ -22,46 +22,51 @@ struct MacroView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    // MARK: - 기본 프리셋 섹션
-                    sectionHeader("기본 단축키")
+            VStack(spacing: 0) {
+                // 연결 상태 헤더 (Work-13 Task 3)
+                ConnectionStatusHeader()
 
-                    LazyVGrid(columns: columns, spacing: 12) {
-                        ForEach(MacroItem.defaults) { macro in
-                            MacroButtonView(macro: macro) {
-                                executeMacro(macro)
-                            }
-                        }
-                    }
-
-                    // MARK: - 사용자 정의 매크로 섹션
-                    if !macroStore.userMacros.isEmpty {
-                        sectionHeader("사용자 매크로")
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 20) {
+                        // MARK: - 기본 프리셋 섹션
+                        sectionHeader("기본 단축키")
 
                         LazyVGrid(columns: columns, spacing: 12) {
-                            ForEach(macroStore.userMacros) { macro in
+                            ForEach(MacroItem.defaults) { macro in
                                 MacroButtonView(macro: macro) {
                                     executeMacro(macro)
                                 }
-                                .contextMenu {
-                                    Button {
-                                        editingMacro = macro
-                                        showAddSheet = true
-                                    } label: {
-                                        Label("편집", systemImage: "pencil")
+                            }
+                        }
+
+                        // MARK: - 사용자 정의 매크로 섹션
+                        if !macroStore.userMacros.isEmpty {
+                            sectionHeader("사용자 매크로")
+
+                            LazyVGrid(columns: columns, spacing: 12) {
+                                ForEach(macroStore.userMacros) { macro in
+                                    MacroButtonView(macro: macro) {
+                                        executeMacro(macro)
                                     }
-                                    Button(role: .destructive) {
-                                        macroStore.delete(macro)
-                                    } label: {
-                                        Label("삭제", systemImage: "trash")
+                                    .contextMenu {
+                                        Button {
+                                            editingMacro = macro
+                                            showAddSheet = true
+                                        } label: {
+                                            Label("편집", systemImage: "pencil")
+                                        }
+                                        Button(role: .destructive) {
+                                            macroStore.delete(macro)
+                                        } label: {
+                                            Label("삭제", systemImage: "trash")
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+                    .padding(16)
                 }
-                .padding(16)
             }
             .navigationTitle("매크로")
             .toolbar {
