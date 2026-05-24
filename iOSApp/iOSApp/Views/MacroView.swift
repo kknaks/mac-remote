@@ -14,6 +14,9 @@ struct MacroView: View {
     /// 편집 중인 매크로 (nil이면 추가 모드, 값이 있으면 편집 모드)
     @State private var editingMacro: MacroItem?
 
+    /// 현재 Hold 모드 진입 중인 매크로 (Work-17). nil이면 hold 비활성.
+    @State private var activeHoldMacro: MacroItem?
+
     /// 2열 그리드 레이아웃 (Spec-03 §8, Work-11 기술 메모)
     private let columns = [
         GridItem(.flexible(), spacing: 12),
@@ -36,6 +39,7 @@ struct MacroView: View {
                                 MacroButtonView(macro: macro) {
                                     executeMacro(macro)
                                 }
+                                .simultaneousGesture(longPressGesture(for: macro))
                             }
                         }
 
@@ -48,6 +52,7 @@ struct MacroView: View {
                                     MacroButtonView(macro: macro) {
                                         executeMacro(macro)
                                     }
+                                    .simultaneousGesture(longPressGesture(for: macro))
                                     .contextMenu {
                                         Button {
                                             editingMacro = macro
@@ -80,6 +85,36 @@ struct MacroView: View {
                         Image(systemName: "plus")
                     }
                     .tint(Color.accent)
+                }
+            }
+            .overlay {
+                // Work-17: Hold 모드 오버레이
+                if let active = activeHoldMacro {
+                    ZStack {
+                        Color.black.opacity(0.35)
+                            .ignoresSafeArea()
+                            .onTapGesture {
+                                // 빈 곳 탭 → 취소와 동일하게 처리
+                                holdCancel()
+                            }
+                        HoldOverlayView(
+                            macro: active,
+                            onPrevious: { holdSendKey(macro: active, addShift: true) },
+                            onNext: { holdSendKey(macro: active, addShift: false) },
+                            onSelect: holdSelect,
+                            onCancel: holdCancel
+                        )
+                        .padding(.horizontal, 24)
+                    }
+                    .transition(.opacity)
+                }
+            }
+            .animation(.easeInOut(duration: 0.15), value: activeHoldMacro?.id)
+            .onDisappear {
+                // Work-17 Task 11: 화면 이탈 시 안전장치 — hold 잔류 방지
+                if activeHoldMacro != nil {
+                    wsManager.sendReleaseModifiers()
+                    activeHoldMacro = nil
                 }
             }
             .sheet(isPresented: $showAddSheet, onDismiss: {
@@ -115,10 +150,52 @@ struct MacroView: View {
         triggerHaptic()
     }
 
+    // MARK: - Hold Mode (Work-17)
+
+    /// holdMode 매크로 long-press 감지용 제스처
+    private func longPressGesture(for macro: MacroItem) -> some Gesture {
+        LongPressGesture(minimumDuration: 0.4)
+            .onEnded { _ in
+                if macro.holdMode {
+                    startHoldMode(macro)
+                }
+            }
+    }
+
+    /// Hold 모드 진입 — modifier hold + 초기 key 전송 + 오버레이 표시
+    private func startHoldMode(_ macro: MacroItem) {
+        wsManager.sendHoldModifiers(macro.modifiers)
+        wsManager.sendKey(key: macro.key, modifiers: [])
+        triggerHaptic(style: .heavy)
+        activeHoldMacro = macro
+    }
+
+    /// Hold 중 단발 key 전송 (다음/이전)
+    private func holdSendKey(macro: MacroItem, addShift: Bool) {
+        // ⌘은 held로 유지 중이므로 요청 modifiers엔 shift 여부만
+        let mods: [String] = addShift ? ["shift"] : []
+        wsManager.sendKey(key: macro.key, modifiers: mods)
+    }
+
+    /// Hold 종료 — 현재 선택을 확정 (release)
+    private func holdSelect() {
+        wsManager.sendReleaseModifiers()
+        activeHoldMacro = nil
+        triggerHaptic()
+    }
+
+    /// Hold 취소 — Esc로 스위처 닫고 release
+    private func holdCancel() {
+        wsManager.sendKey(key: "escape", modifiers: [])
+        wsManager.sendReleaseModifiers()
+        activeHoldMacro = nil
+        triggerHaptic()
+    }
+
     /// 햅틱 피드백 (UIImpactFeedbackGenerator, Work-11 기술 메모)
-    private func triggerHaptic() {
+    private func triggerHaptic(style: UIImpactFeedbackGenerator.FeedbackStyle = .medium) {
         #if canImport(UIKit)
-        let generator = UIImpactFeedbackGenerator(style: .medium)
+        let generator = UIImpactFeedbackGenerator(style: style)
         generator.impactOccurred()
         #endif
     }

@@ -1,0 +1,457 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		FB421FA52FC2B3D000DAF21D /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421F952FC2B3D000DAF21D /* AppSettings.swift */; };
+		FB421FA62FC2B3D000DAF21D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421F9E2FC2B3D000DAF21D /* SettingsView.swift */; };
+		FB421FA72FC2B3D000DAF21D /* DisconnectedOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421F8F2FC2B3D000DAF21D /* DisconnectedOverlay.swift */; };
+		FB421FA82FC2B3D000DAF21D /* AddMacroSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421F9B2FC2B3D000DAF21D /* AddMacroSheet.swift */; };
+		FB421FA92FC2B3D000DAF21D /* StatusIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421F922FC2B3D000DAF21D /* StatusIndicator.swift */; };
+		FB421FAA2FC2B3D000DAF21D /* WindowListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421F9F2FC2B3D000DAF21D /* WindowListView.swift */; };
+		FB421FAB2FC2B3D000DAF21D /* MacroButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421F902FC2B3D000DAF21D /* MacroButtonView.swift */; };
+		FBHOLD01001D2FC2B3D000DAF21D /* HoldOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBHOLD02002D2FC2B3D000DAF21D /* HoldOverlayView.swift */; };
+		FB421FAC2FC2B3D000DAF21D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421FA12FC2B3D000DAF21D /* ContentView.swift */; };
+		FB421FAD2FC2B3D000DAF21D /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421F9D2FC2B3D000DAF21D /* QRScannerView.swift */; };
+		FB421FAE2FC2B3D000DAF21D /* iOSAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421FA22FC2B3D000DAF21D /* iOSAppApp.swift */; };
+		FB421FAF2FC2B3D000DAF21D /* WindowCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421F932FC2B3D000DAF21D /* WindowCardView.swift */; };
+		FB421FB02FC2B3D000DAF21D /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421F992FC2B3D000DAF21D /* Models.swift */; };
+		FB421FB12FC2B3D000DAF21D /* MacroItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421F972FC2B3D000DAF21D /* MacroItem.swift */; };
+		FB421FB22FC2B3D000DAF21D /* WebSocketManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421FA32FC2B3D000DAF21D /* WebSocketManager.swift */; };
+		FB421FB32FC2B3D000DAF21D /* MacroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421F9C2FC2B3D000DAF21D /* MacroView.swift */; };
+		FB421FB42FC2B3D000DAF21D /* ConnectionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421F962FC2B3D000DAF21D /* ConnectionInfo.swift */; };
+		FB421FB52FC2B3D000DAF21D /* MacroStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421F982FC2B3D000DAF21D /* MacroStore.swift */; };
+		FB421FB62FC2B3D000DAF21D /* ReconnectingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421F912FC2B3D000DAF21D /* ReconnectingOverlay.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		FB2AE5CB2FC2AE6800A516CC /* MacRemote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacRemote.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FB421F8F2FC2B3D000DAF21D /* DisconnectedOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisconnectedOverlay.swift; sourceTree = "<group>"; };
+		FB421F902FC2B3D000DAF21D /* MacroButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacroButtonView.swift; sourceTree = "<group>"; };
+		FBHOLD02002D2FC2B3D000DAF21D /* HoldOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoldOverlayView.swift; sourceTree = "<group>"; };
+		FB421F912FC2B3D000DAF21D /* ReconnectingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconnectingOverlay.swift; sourceTree = "<group>"; };
+		FB421F922FC2B3D000DAF21D /* StatusIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusIndicator.swift; sourceTree = "<group>"; };
+		FB421F932FC2B3D000DAF21D /* WindowCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowCardView.swift; sourceTree = "<group>"; };
+		FB421F952FC2B3D000DAF21D /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		FB421F962FC2B3D000DAF21D /* ConnectionInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionInfo.swift; sourceTree = "<group>"; };
+		FB421F972FC2B3D000DAF21D /* MacroItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacroItem.swift; sourceTree = "<group>"; };
+		FB421F982FC2B3D000DAF21D /* MacroStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacroStore.swift; sourceTree = "<group>"; };
+		FB421F992FC2B3D000DAF21D /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		FB421F9B2FC2B3D000DAF21D /* AddMacroSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddMacroSheet.swift; sourceTree = "<group>"; };
+		FB421F9C2FC2B3D000DAF21D /* MacroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacroView.swift; sourceTree = "<group>"; };
+		FB421F9D2FC2B3D000DAF21D /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
+		FB421F9E2FC2B3D000DAF21D /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		FB421F9F2FC2B3D000DAF21D /* WindowListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowListView.swift; sourceTree = "<group>"; };
+		FB421FA12FC2B3D000DAF21D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		FB421FA22FC2B3D000DAF21D /* iOSAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSAppApp.swift; sourceTree = "<group>"; };
+		FB421FA32FC2B3D000DAF21D /* WebSocketManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketManager.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		FB2AE5C82FC2AE6800A516CC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		FB2AE5C22FC2AE6800A516CC = {
+			isa = PBXGroup;
+			children = (
+				FB2AE5CC2FC2AE6800A516CC /* Products */,
+				FB421FA42FC2B3D000DAF21D /* iOSApp */,
+			);
+			sourceTree = "<group>";
+		};
+		FB2AE5CC2FC2AE6800A516CC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FB2AE5CB2FC2AE6800A516CC /* MacRemote.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		FB421F942FC2B3D000DAF21D /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				FB421F8F2FC2B3D000DAF21D /* DisconnectedOverlay.swift */,
+				FB421F902FC2B3D000DAF21D /* MacroButtonView.swift */,
+				FB421F912FC2B3D000DAF21D /* ReconnectingOverlay.swift */,
+				FBHOLD02002D2FC2B3D000DAF21D /* HoldOverlayView.swift */,
+				FB421F922FC2B3D000DAF21D /* StatusIndicator.swift */,
+				FB421F932FC2B3D000DAF21D /* WindowCardView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		FB421F9A2FC2B3D000DAF21D /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				FB421F952FC2B3D000DAF21D /* AppSettings.swift */,
+				FB421F962FC2B3D000DAF21D /* ConnectionInfo.swift */,
+				FB421F972FC2B3D000DAF21D /* MacroItem.swift */,
+				FB421F982FC2B3D000DAF21D /* MacroStore.swift */,
+				FB421F992FC2B3D000DAF21D /* Models.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		FB421FA02FC2B3D000DAF21D /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				FB421F9B2FC2B3D000DAF21D /* AddMacroSheet.swift */,
+				FB421F9C2FC2B3D000DAF21D /* MacroView.swift */,
+				FB421F9D2FC2B3D000DAF21D /* QRScannerView.swift */,
+				FB421F9E2FC2B3D000DAF21D /* SettingsView.swift */,
+				FB421F9F2FC2B3D000DAF21D /* WindowListView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		FB421FA42FC2B3D000DAF21D /* iOSApp */ = {
+			isa = PBXGroup;
+			children = (
+				FB421F942FC2B3D000DAF21D /* Components */,
+				FB421F9A2FC2B3D000DAF21D /* Models */,
+				FB421FA02FC2B3D000DAF21D /* Views */,
+				FB421FA12FC2B3D000DAF21D /* ContentView.swift */,
+				FB421FA22FC2B3D000DAF21D /* iOSAppApp.swift */,
+				FB421FA32FC2B3D000DAF21D /* WebSocketManager.swift */,
+			);
+			path = iOSApp;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		FB2AE5CA2FC2AE6800A516CC /* MacRemote */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FB2AE5D62FC2AE6900A516CC /* Build configuration list for PBXNativeTarget "MacRemote" */;
+			buildPhases = (
+				FB2AE5C72FC2AE6800A516CC /* Sources */,
+				FB2AE5C82FC2AE6800A516CC /* Frameworks */,
+				FB2AE5C92FC2AE6800A516CC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MacRemote;
+			packageProductDependencies = (
+			);
+			productName = MacRemote;
+			productReference = FB2AE5CB2FC2AE6800A516CC /* MacRemote.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		FB2AE5C32FC2AE6800A516CC /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2620;
+				LastUpgradeCheck = 2620;
+				TargetAttributes = {
+					FB2AE5CA2FC2AE6800A516CC = {
+						CreatedOnToolsVersion = 26.2;
+					};
+				};
+			};
+			buildConfigurationList = FB2AE5C62FC2AE6800A516CC /* Build configuration list for PBXProject "MacRemote" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = FB2AE5C22FC2AE6800A516CC;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = FB2AE5CC2FC2AE6800A516CC /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				FB2AE5CA2FC2AE6800A516CC /* MacRemote */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		FB2AE5C92FC2AE6800A516CC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		FB2AE5C72FC2AE6800A516CC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FB421FA52FC2B3D000DAF21D /* AppSettings.swift in Sources */,
+				FB421FA62FC2B3D000DAF21D /* SettingsView.swift in Sources */,
+				FB421FA72FC2B3D000DAF21D /* DisconnectedOverlay.swift in Sources */,
+				FB421FA82FC2B3D000DAF21D /* AddMacroSheet.swift in Sources */,
+				FB421FA92FC2B3D000DAF21D /* StatusIndicator.swift in Sources */,
+				FB421FAA2FC2B3D000DAF21D /* WindowListView.swift in Sources */,
+				FB421FAB2FC2B3D000DAF21D /* MacroButtonView.swift in Sources */,
+				FBHOLD01001D2FC2B3D000DAF21D /* HoldOverlayView.swift in Sources */,
+				FB421FAC2FC2B3D000DAF21D /* ContentView.swift in Sources */,
+				FB421FAD2FC2B3D000DAF21D /* QRScannerView.swift in Sources */,
+				FB421FAE2FC2B3D000DAF21D /* iOSAppApp.swift in Sources */,
+				FB421FAF2FC2B3D000DAF21D /* WindowCardView.swift in Sources */,
+				FB421FB02FC2B3D000DAF21D /* Models.swift in Sources */,
+				FB421FB12FC2B3D000DAF21D /* MacroItem.swift in Sources */,
+				FB421FB22FC2B3D000DAF21D /* WebSocketManager.swift in Sources */,
+				FB421FB32FC2B3D000DAF21D /* MacroView.swift in Sources */,
+				FB421FB42FC2B3D000DAF21D /* ConnectionInfo.swift in Sources */,
+				FB421FB52FC2B3D000DAF21D /* MacroStore.swift in Sources */,
+				FB421FB62FC2B3D000DAF21D /* ReconnectingOverlay.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		FB2AE5D42FC2AE6900A516CC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = UYQF47UCVR;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		FB2AE5D52FC2AE6900A516CC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = UYQF47UCVR;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		FB2AE5D72FC2AE6900A516CC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UYQF47UCVR;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "QR 코드 스캔에 사용됩니다.";
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 15.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.macremote.MacRemote;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Debug;
+		};
+		FB2AE5D82FC2AE6900A516CC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UYQF47UCVR;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "QR 코드 스캔에 사용됩니다.";
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 15.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.macremote.MacRemote;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		FB2AE5C62FC2AE6800A516CC /* Build configuration list for PBXProject "MacRemote" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FB2AE5D42FC2AE6900A516CC /* Debug */,
+				FB2AE5D52FC2AE6900A516CC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FB2AE5D62FC2AE6900A516CC /* Build configuration list for PBXNativeTarget "MacRemote" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FB2AE5D72FC2AE6900A516CC /* Debug */,
+				FB2AE5D82FC2AE6900A516CC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = FB2AE5C32FC2AE6800A516CC /* Project object */;
+}

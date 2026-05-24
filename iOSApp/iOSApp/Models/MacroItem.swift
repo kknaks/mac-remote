@@ -14,14 +14,17 @@ struct MacroItem: Codable, Equatable, Identifiable {
     let modifiers: [String]
     let icon: String
     let isUserDefined: Bool
+    /// Hold 모드 (Work-17, Spec-03 §3-3): true면 길게 누르기 시 hold 오버레이 진입
+    let holdMode: Bool
 
-    init(name: String, key: String, modifiers: [String] = [], icon: String = "command", isUserDefined: Bool = false) {
+    init(name: String, key: String, modifiers: [String] = [], icon: String = "command", isUserDefined: Bool = false, holdMode: Bool = false) {
         self.id = UUID()
         self.name = name
         self.key = key
         self.modifiers = modifiers
         self.icon = icon
         self.isUserDefined = isUserDefined
+        self.holdMode = holdMode
     }
 
     /// ClientMessage로 변환 (전송용, Spec-03 §3-1)
@@ -51,7 +54,7 @@ struct MacroItem: Codable, Equatable, Identifiable {
     // MARK: - Codable (id 제외)
 
     enum CodingKeys: String, CodingKey {
-        case name, key, modifiers, icon, isUserDefined
+        case name, key, modifiers, icon, isUserDefined, holdMode
     }
 
     init(from decoder: Decoder) throws {
@@ -62,6 +65,7 @@ struct MacroItem: Codable, Equatable, Identifiable {
         self.modifiers = try container.decodeIfPresent([String].self, forKey: .modifiers) ?? []
         self.icon = try container.decodeIfPresent(String.self, forKey: .icon) ?? "command"
         self.isUserDefined = try container.decodeIfPresent(Bool.self, forKey: .isUserDefined) ?? false
+        self.holdMode = try container.decodeIfPresent(Bool.self, forKey: .holdMode) ?? false
     }
 }
 
@@ -77,7 +81,7 @@ extension MacroItem {
         MacroItem(name: "다시실행", key: "z", modifiers: ["cmd", "shift"], icon: "arrow.uturn.forward"),
         MacroItem(name: "스크린샷", key: "4", modifiers: ["cmd", "shift"], icon: "camera.viewfinder"),
         MacroItem(name: "화면잠금", key: "q", modifiers: ["ctrl", "cmd"], icon: "lock"),
-        MacroItem(name: "앱전환", key: "tab", modifiers: ["cmd"], icon: "rectangle.on.rectangle"),
+        MacroItem(name: "앱전환", key: "tab", modifiers: ["cmd"], icon: "rectangle.on.rectangle", holdMode: true),
     ]
 
     /// UserDefaults에 저장할 때 사용하는 키

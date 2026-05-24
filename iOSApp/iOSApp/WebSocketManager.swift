@@ -373,6 +373,17 @@ final class WebSocketManager: ObservableObject {
         sendMessage(ClientMessage(action: "getPermissions"))
     }
 
+    /// Hold 모드 진입 — modifier 누른 상태 유지 (Work-17, Spec-03 §3-1)
+    /// - Parameter modifiers: hold할 modifier 목록 (예: ["cmd"])
+    func sendHoldModifiers(_ modifiers: [String]) {
+        sendMessage(ClientMessage(action: "holdModifiers", modifiers: modifiers))
+    }
+
+    /// Hold 모드 종료 — 유지 중인 modifier 모두 release (Work-17, Spec-03 §3-1)
+    func sendReleaseModifiers() {
+        sendMessage(ClientMessage(action: "releaseModifiers"))
+    }
+
     // MARK: - Auto Reconnect (Spec-05 §4, §5)
 
     /// 재연결 시도 (최대 wsMaxReconnectAttempts회, wsReconnectDelay초 간격)
