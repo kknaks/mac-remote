@@ -111,6 +111,12 @@ public func isValidPNGBase64(_ base64String: String) -> Bool {
     return header == pngSignature
 }
 
+// MARK: - Icon size constant (Spec-04 §9 #3)
+
+/// 아이콘 리사이즈 크기 (Spec-04 §9 #3, Work-04 Task 3)
+/// 전송 크기 최적화를 위해 64x64로 리사이즈
+public let iconSizePixels: Int = 64
+
 // MARK: - Default icon (fallback)
 
 /// 기본 아이콘 base64 (Spec-04 §5 ICON_NOT_FOUND)
@@ -139,8 +145,8 @@ import AppKit
 /// 앱 아이콘 추출기 (macOS 전용)
 public enum IconExtractor {
 
-    /// 아이콘 리사이즈 크기 (Spec-04 §9 #3, Work-04 Task 3)
-    public static let iconSize: CGFloat = 64.0
+    /// 아이콘 리사이즈 크기 (CGFloat 버전, NSImage 사용)
+    public static let iconSize: CGFloat = CGFloat(iconSizePixels)
 
     /// PID로 앱 아이콘 추출 (Task 1)
     /// NSRunningApplication(processIdentifier: pid)?.icon

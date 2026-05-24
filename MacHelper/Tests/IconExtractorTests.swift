@@ -57,6 +57,13 @@ final class IconExtractorTests: XCTestCase {
         XCTAssertEqual(original, decoded)
     }
 
+    // MARK: - Task 3: Icon resize constant (Spec-04 §9 #3)
+
+    func test_iconSizePixels_is64() {
+        // Spec-04 §9 #3: 적절한 크기(64x64)로 리사이즈
+        XCTAssertEqual(iconSizePixels, 64)
+    }
+
     // MARK: - Task 2: base64 encoding (pure Swift)
 
     func test_encodeToBase64_validData_returnsBase64String() {
