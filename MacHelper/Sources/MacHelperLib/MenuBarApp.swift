@@ -86,16 +86,23 @@ public struct MenuBarContentView: View {
     }
 }
 
-// MARK: - QRCodeView (Work-07 Task 3)
+// MARK: - QRCodeView (Work-07 Task 3, 4)
 
 /// QR 코드 표시 뷰 — 메뉴바 팝오버 내부에 배치
 /// ConnectionInfo에서 ws://IP:PORT QR 코드를 생성하여 표시한다.
+/// IP 변경 감지 시 자동으로 QR 코드를 갱신한다. (Spec-07 §9)
 @available(macOS 14.0, *)
 public struct QRCodeView: View {
     let port: UInt16
+    @State private var currentIP: String = NetworkInfo.primaryIPAddress()
+    @State private var ipMonitor: IPMonitor?
 
     public init(port: UInt16) {
         self.port = port
+    }
+
+    private var connectionInfo: ConnectionInfo {
+        ConnectionInfo(host: currentIP, port: port)
     }
 
     public var body: some View {
@@ -110,18 +117,24 @@ public struct QRCodeView: View {
                 .cornerRadius(8)
 
             // WebSocket URL 텍스트
-            let info = QRGenerator.currentConnectionInfo(port: port)
-            Text(info.webSocketURL)
+            Text(connectionInfo.webSocketURL)
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .textSelection(.enabled)
+        }
+        .onAppear {
+            startIPMonitor()
+        }
+        .onDisappear {
+            ipMonitor?.stop()
         }
     }
 
     @ViewBuilder
     private var qrImageView: some View {
-        let info = QRGenerator.currentConnectionInfo(port: port)
-        if let nsImage = QRGenerator.generateNSImage(for: info, size: QRGenerator.defaultQRSize) {
+        if let nsImage = QRGenerator.generateNSImage(
+            for: connectionInfo, size: QRGenerator.defaultQRSize
+        ) {
             Image(nsImage: nsImage)
                 .interpolation(.none)
                 .resizable()
@@ -137,6 +150,18 @@ public struct QRCodeView: View {
                     .foregroundStyle(.secondary)
             }
         }
+    }
+
+    /// IP 변경 감지 모니터 시작 (Work-07 Task 4)
+    private func startIPMonitor() {
+        let monitor = IPMonitor()
+        monitor.onIPChanged = { newIP in
+            DispatchQueue.main.async {
+                self.currentIP = newIP
+            }
+        }
+        monitor.start()
+        self.ipMonitor = monitor
     }
 }
 #endif

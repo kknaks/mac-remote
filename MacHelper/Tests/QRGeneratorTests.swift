@@ -117,4 +117,57 @@ final class QRGeneratorTests: XCTestCase {
         XCTAssertEqual(state.fullAddressText(ip: ip), "\(ip):8765")
         XCTAssertEqual(info.webSocketURL, "ws://\(ip):8765")
     }
+
+    // MARK: - Task 4: IP 변경 감지
+
+    func test_ipMonitor_initialIP() {
+        let monitor = IPMonitor()
+        // 초기 IP는 NetworkInfo.primaryIPAddress()와 동일
+        XCTAssertEqual(monitor.currentIP, NetworkInfo.primaryIPAddress())
+    }
+
+    func test_ipMonitor_checkIPChange_noChange_noCallback() {
+        let monitor = IPMonitor()
+        var callbackCalled = false
+        monitor.onIPChanged = { _ in
+            callbackCalled = true
+        }
+        // IP가 같으면 콜백 호출 안 됨
+        monitor.checkIPChange()
+        XCTAssertFalse(callbackCalled)
+    }
+
+    func test_ipMonitor_checkIPChange_changed_callsCallback() {
+        let monitor = IPMonitor()
+        // 강제로 다른 IP 설정
+        monitor._setCurrentIP("10.0.0.1")
+
+        var receivedIP: String?
+        monitor.onIPChanged = { newIP in
+            receivedIP = newIP
+        }
+
+        // checkIPChange는 NetworkInfo.primaryIPAddress()와 비교
+        // Linux에서 primaryIPAddress()는 "localhost"
+        // currentIP를 "10.0.0.1"로 설정했으므로 변경이 감지됨
+        monitor.checkIPChange()
+
+        let expectedIP = NetworkInfo.primaryIPAddress()
+        XCTAssertEqual(receivedIP, expectedIP)
+        XCTAssertEqual(monitor.currentIP, expectedIP)
+    }
+
+    func test_ipMonitor_setCurrentIP() {
+        let monitor = IPMonitor()
+        monitor._setCurrentIP("192.168.1.100")
+        XCTAssertEqual(monitor.currentIP, "192.168.1.100")
+    }
+
+    func test_ipMonitor_stopDoesNotCrash() {
+        let monitor = IPMonitor()
+        monitor.start()
+        monitor.stop()
+        // stop 후에도 에러 없음
+        XCTAssertTrue(true)
+    }
 }

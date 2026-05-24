@@ -1,5 +1,9 @@
 import Foundation
 
+#if canImport(Network)
+import Network
+#endif
+
 // MARK: - NetworkInfo (Work-06 Task 3)
 
 /// 로컬 네트워크 IP 주소 조회
@@ -54,5 +58,62 @@ public enum NetworkInfo {
     /// 대표 IP 주소 (첫 번째, 없으면 "localhost")
     public static func primaryIPAddress() -> String {
         return localIPAddresses().first ?? "localhost"
+    }
+}
+
+// MARK: - IPMonitor (Work-07 Task 4)
+
+/// IP 주소 변경 감지 — NWPathMonitor 사용
+/// 네트워크 경로가 바뀌면 콜백을 호출해 QR 코드를 갱신한다.
+/// Spec-07 §9: IP 변경 시 QR 갱신
+public final class IPMonitor {
+
+    /// 현재 감지된 IP 주소
+    public private(set) var currentIP: String
+
+    /// IP 변경 시 호출되는 콜백
+    public var onIPChanged: ((String) -> Void)?
+
+    #if canImport(Network)
+    private let monitor = NWPathMonitor()
+    private let queue = DispatchQueue(label: "com.machelper.ipmonitor")
+    #endif
+
+    public init() {
+        self.currentIP = NetworkInfo.primaryIPAddress()
+    }
+
+    /// 모니터링 시작
+    public func start() {
+        #if canImport(Network)
+        monitor.pathUpdateHandler = { [weak self] _ in
+            self?.checkIPChange()
+        }
+        monitor.start(queue: queue)
+        #endif
+    }
+
+    /// 모니터링 정지
+    public func stop() {
+        #if canImport(Network)
+        monitor.cancel()
+        #endif
+    }
+
+    /// IP 변경 확인 — 변경 시 콜백 호출
+    /// 외부에서 수동으로 호출 가능 (테스트용)
+    public func checkIPChange() {
+        let newIP = NetworkInfo.primaryIPAddress()
+        if newIP != currentIP {
+            let oldIP = currentIP
+            currentIP = newIP
+            print("[INFO] IP changed: \(oldIP) → \(newIP)")
+            onIPChanged?(newIP)
+        }
+    }
+
+    /// 테스트용: 현재 IP를 강제로 설정 (변경 감지 테스트)
+    internal func _setCurrentIP(_ ip: String) {
+        currentIP = ip
     }
 }
