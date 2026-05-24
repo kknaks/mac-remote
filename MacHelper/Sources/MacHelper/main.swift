@@ -4,15 +4,50 @@ import MacHelperLib
 // MacHelper CLI Prototype
 // Usage:
 //   swift run MacHelper                    — 창 목록 출력
+//   swift run MacHelper focus <windowId>   — 창 활성화 (Work-02)
 //   swift run MacHelper key <key> [mods..] — 키 입력 전송 (Work-03)
 
 let args = CommandLine.arguments
+
+// MARK: - "focus" 서브커맨드 (Work-02 Task 5)
+// swift run MacHelper focus 123
+
+if args.count == 3 && args[1] == "focus" {
+    guard let windowId = Int(args[2]), windowId > 0 else {
+        print(formatFocusAckJSON(ok: false, error: "invalid windowId"))
+        #if canImport(AppKit)
+        exit(1)
+        #else
+        Foundation.exit(1)
+        #endif
+    }
+
+    #if canImport(AppKit)
+    // macOS: 실제 창 활성화
+    // 1. 현재 창 목록 수집
+    let windows = WindowManager.listWindows()
+
+    // 2. focus 실행 + ack 응답
+    let ackJSON = WindowFocuser.focusWithAck(windowId: windowId, windows: windows)
+    print(ackJSON)
+
+    // ack:false인 경우 exit(1)
+    if let data = ackJSON.data(using: .utf8),
+       let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+       let ok = dict["ok"] as? Bool, !ok {
+        exit(1)
+    }
+    #else
+    // Linux/기타: 스텁 출력
+    print("[INFO] Focus command received (stub): windowId=\(windowId)")
+    print(formatFocusAckJSON(ok: true))
+    #endif
 
 // MARK: - "key" 서브커맨드 (Work-03 Task 5)
 // swift run MacHelper key c cmd
 // swift run MacHelper key 4 cmd shift
 
-if args.count >= 3 && args[1] == "key" {
+} else if args.count >= 3 && args[1] == "key" {
     let keyName = args[2]
     let modifiers = Array(args.dropFirst(3))  // 나머지는 modifier
 
@@ -94,10 +129,12 @@ if args.count >= 3 && args[1] == "key" {
 } else {
     // 사용법 출력
     print("Usage:")
-    print("  MacHelper              — 창 목록 출력")
-    print("  MacHelper key <key> [modifiers...]  — 키 입력 전송")
+    print("  MacHelper                          — 창 목록 출력")
+    print("  MacHelper focus <windowId>         — 창 활성화")
+    print("  MacHelper key <key> [modifiers...] — 키 입력 전송")
     print("")
     print("Examples:")
+    print("  MacHelper focus 123          — windowId 123 활성화")
     print("  MacHelper key c cmd          — ⌘C 전송")
     print("  MacHelper key 4 cmd shift    — ⌘⇧4 전송")
     print("  MacHelper key tab            — Tab 전송")
