@@ -143,4 +143,35 @@ final class JSONOutputTests: XCTestCase {
         let jsonString = formatAppIconsJSON(["App": "data"])
         XCTAssertTrue(jsonString.contains("\n"))
     }
+
+    // MARK: - formatKeyAckJSON (Spec-03 §3-1)
+
+    func test_formatKeyAckJSON_success_specFormat() throws {
+        let response = KeyAckResponse(ok: true)
+        let jsonString = formatKeyAckJSON(response)
+        let data = jsonString.data(using: .utf8)!
+        let json = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+
+        XCTAssertEqual(json["type"] as? String, "ack")
+        XCTAssertEqual(json["action"] as? String, "key")
+        XCTAssertEqual(json["ok"] as? Bool, true)
+    }
+
+    func test_formatKeyAckJSON_failure_specFormat() throws {
+        let response = KeyAckResponse(ok: false, error: "unknown key: xyz")
+        let jsonString = formatKeyAckJSON(response)
+        let data = jsonString.data(using: .utf8)!
+        let json = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+
+        XCTAssertEqual(json["type"] as? String, "ack")
+        XCTAssertEqual(json["action"] as? String, "key")
+        XCTAssertEqual(json["ok"] as? Bool, false)
+        XCTAssertEqual(json["error"] as? String, "unknown key: xyz")
+    }
+
+    func test_formatKeyAckJSON_isPrettyPrinted() {
+        let response = KeyAckResponse(ok: true)
+        let jsonString = formatKeyAckJSON(response)
+        XCTAssertTrue(jsonString.contains("\n"))
+    }
 }

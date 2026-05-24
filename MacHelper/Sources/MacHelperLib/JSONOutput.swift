@@ -37,3 +37,14 @@ public func formatAppIconsJSON(_ icons: [String: String]) -> String {
     }
     return String(data: data, encoding: .utf8) ?? #"{"type":"appIcons","icons":{}}"#
 }
+
+/// KeyAckResponse를 Spec-03 §3-1 형식의 JSON 문자열로 변환
+public func formatKeyAckJSON(_ response: KeyAckResponse) -> String {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+
+    guard let data = try? encoder.encode(response) else {
+        return #"{"type":"ack","action":"key","ok":false}"#
+    }
+    return String(data: data, encoding: .utf8) ?? #"{"type":"ack","action":"key","ok":false}"#
+}
