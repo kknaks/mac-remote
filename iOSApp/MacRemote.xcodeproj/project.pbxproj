@@ -15,6 +15,7 @@
 		FB421FAA2FC2B3D000DAF21D /* WindowListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421F9F2FC2B3D000DAF21D /* WindowListView.swift */; };
 		FB421FAB2FC2B3D000DAF21D /* MacroButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421F902FC2B3D000DAF21D /* MacroButtonView.swift */; };
 		FBHOLD01001D2FC2B3D000DAF21D /* HoldOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBHOLD02002D2FC2B3D000DAF21D /* HoldOverlayView.swift */; };
+		FBASSETS001D2FC2B3D000DAF21D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FBASSETS002D2FC2B3D000DAF21D /* Assets.xcassets */; };
 		FB421FAC2FC2B3D000DAF21D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421FA12FC2B3D000DAF21D /* ContentView.swift */; };
 		FB421FAD2FC2B3D000DAF21D /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421F9D2FC2B3D000DAF21D /* QRScannerView.swift */; };
 		FB421FAE2FC2B3D000DAF21D /* iOSAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB421FA22FC2B3D000DAF21D /* iOSAppApp.swift */; };
@@ -33,6 +34,7 @@
 		FB421F8F2FC2B3D000DAF21D /* DisconnectedOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisconnectedOverlay.swift; sourceTree = "<group>"; };
 		FB421F902FC2B3D000DAF21D /* MacroButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacroButtonView.swift; sourceTree = "<group>"; };
 		FBHOLD02002D2FC2B3D000DAF21D /* HoldOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoldOverlayView.swift; sourceTree = "<group>"; };
+		FBASSETS002D2FC2B3D000DAF21D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FB421F912FC2B3D000DAF21D /* ReconnectingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconnectingOverlay.swift; sourceTree = "<group>"; };
 		FB421F922FC2B3D000DAF21D /* StatusIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusIndicator.swift; sourceTree = "<group>"; };
 		FB421F932FC2B3D000DAF21D /* WindowCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowCardView.swift; sourceTree = "<group>"; };
@@ -124,6 +126,7 @@
 				FB421FA12FC2B3D000DAF21D /* ContentView.swift */,
 				FB421FA22FC2B3D000DAF21D /* iOSAppApp.swift */,
 				FB421FA32FC2B3D000DAF21D /* WebSocketManager.swift */,
+				FBASSETS002D2FC2B3D000DAF21D /* Assets.xcassets */,
 			);
 			path = iOSApp;
 			sourceTree = "<group>";
@@ -189,6 +192,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FBASSETS001D2FC2B3D000DAF21D /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
