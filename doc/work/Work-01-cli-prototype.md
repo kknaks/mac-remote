@@ -32,7 +32,7 @@
 
 | # | 태스크 | 상태 | 커밋 | 비고 |
 |---|--------|------|------|------|
-| 1 | Swift Package 프로젝트 생성 (MacHelper) | [x] | 59c4ad1 | executable + lib 타겟 분리 |
+| 1 | Swift Package 프로젝트 생성 (MacHelper) | [x] | 2c9fe3b, 59c4ad1 | 초기 생성 + lib 타겟 분리 |
 | 2 | WindowInfo 모델 정의 | [x] | 4ae29b0 | Codable, Equatable, public |
 | 3 | CGWindowListCopyWindowInfo 호출 + 필터링 | [x] | 67e0567 | layer, OwnerName, 시스템 프로세스 |
 | 4 | frontmost 판별 로직 | [x] | c4d3004 | 최대 1개만 true, NSWorkspace |

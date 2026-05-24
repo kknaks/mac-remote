@@ -84,16 +84,29 @@ mac-remote/
 │   └── Architecture.md
 ├── MacHelper/                         ← Mac 헬퍼 (메뉴바 앱, Swift Package)
 │   ├── Package.swift
-│   └── Sources/
-│       ├── Models.swift               ← 공유 모델 (WindowInfo, KeyCommand 등)
-│       ├── WindowManager.swift        ← 창 목록 수집 (CGWindowListCopyWindowInfo)
-│       ├── WindowFocuser.swift        ← 창 활성화 (PID + AXRaise)
-│       ├── KeySender.swift            ← 키 입력 전송 (CGEvent)
-│       ├── IconExtractor.swift        ← 앱 아이콘 추출 (NSWorkspace)
-│       ├── PermissionChecker.swift    ← 권한 확인 (AXIsProcessTrusted)
-│       ├── WebSocketServer.swift      ← WS 서버 + 메시지 라우팅 (Swifter)
-│       ├── QRGenerator.swift          ← QR 코드 생성 (CIFilter)
-│       └── MenuBarApp.swift           ← 앱 엔트리 (MenuBarExtra)
+│   ├── Sources/
+│   │   ├── MacHelper/
+│   │   │   └── main.swift             ← CLI 엔트리포인트
+│   │   └── MacHelperLib/
+│   │       ├── MacHelperLib.swift      ← 라이브러리 엔트리
+│   │       ├── Models.swift           ← 공유 모델 (WindowInfo, KeyCommand 등)
+│   │       ├── WindowManager.swift    ← 창 목록 수집 (CGWindowListCopyWindowInfo)
+│   │       ├── WindowFocuser.swift    ← 창 활성화 (PID + AXRaise)
+│   │       ├── KeySender.swift        ← 키 입력 전송 (CGEvent)
+│   │       ├── IconExtractor.swift    ← 앱 아이콘 추출 (NSWorkspace)
+│   │       ├── PermissionChecker.swift ← 권한 확인 (AXIsProcessTrusted)
+│   │       ├── PermissionGuide.swift  ← 권한 안내 메시지
+│   │       ├── JSONOutput.swift       ← JSON 콘솔 출력
+│   │       ├── WebSocketServer.swift  ← WS 서버 + 메시지 라우팅 (Swifter)
+│   │       ├── QRGenerator.swift      ← QR 코드 생성 (CIFilter)
+│   │       └── MenuBarApp.swift       ← 앱 엔트리 (MenuBarExtra)
+│   └── Tests/
+│       ├── MacHelperTests.swift       ← 통합 테스트
+│       ├── ModelsTests.swift          ← 모델 테스트
+│       ├── WindowManagerTests.swift   ← 창 관리 테스트
+│       ├── PermissionCheckerTests.swift ← 권한 확인 테스트
+│       ├── PermissionGuideTests.swift ← 권한 안내 테스트
+│       └── JSONOutputTests.swift      ← JSON 출력 테스트
 ├── iOSApp/                            ← iPhone 앱 (SwiftUI, iOS 17+)
 │   ├── iOSApp.xcodeproj
 │   └── iOSApp/
