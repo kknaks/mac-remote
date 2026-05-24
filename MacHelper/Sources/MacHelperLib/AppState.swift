@@ -75,6 +75,11 @@ public final class AppState {
         return "포트: \(serverPort)"
     }
 
+    /// IP:포트 전체 주소 문자열 (iOS 앱 연결용)
+    public func fullAddressText(ip: String) -> String {
+        return "\(ip):\(serverPort)"
+    }
+
     /// Accessibility 권한 상태 표시 문자열
     public var accessibilityStatusText: String {
         return permissions.accessibility ? "✅ 손쉬운 사용" : "❌ 손쉬운 사용"

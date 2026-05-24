@@ -122,6 +122,16 @@ final class AppStateTests: XCTestCase {
         XCTAssertEqual(state.addressText, "포트: 8765")
     }
 
+    func test_fullAddressText() {
+        let state = AppState(port: 8765)
+        XCTAssertEqual(state.fullAddressText(ip: "192.168.1.10"), "192.168.1.10:8765")
+    }
+
+    func test_fullAddressText_localhost() {
+        let state = AppState(port: 9000)
+        XCTAssertEqual(state.fullAddressText(ip: "localhost"), "localhost:9000")
+    }
+
     func test_accessibilityStatusText_granted() {
         let state = AppState()
         state.updatePermissions(PermissionStatus(accessibility: true, screenRecording: false))

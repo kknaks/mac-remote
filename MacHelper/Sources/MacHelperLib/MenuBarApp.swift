@@ -50,10 +50,13 @@ struct MenuBarContentView: View {
     let onOpenScreenRecordingSettings: () -> Void
 
     var body: some View {
-        // Task 3: 연결 상태 표시
+        // Task 3: 연결 상태 표시 (클라이언트 수, IP:포트)
         Section("연결") {
             Text(appState.connectionStatusText)
             Text(appState.addressText)
+            Text(appState.fullAddressText(ip: NetworkInfo.primaryIPAddress()))
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
 
         Divider()
