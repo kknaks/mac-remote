@@ -5,6 +5,8 @@ import SwiftUI
 /// - 매크로 (command)
 /// - 설정 (gearshape)
 struct ContentView: View {
+    @EnvironmentObject var wsManager: WebSocketManager
+
     var body: some View {
         TabView {
             WindowListView()
@@ -29,4 +31,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environmentObject(WebSocketManager())
 }
