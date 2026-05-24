@@ -68,4 +68,29 @@ final class WebSocketServerTests: XCTestCase {
 
     // Note: pushNewAppIcons 실제 동작은 macOS에서 수동 검증
     // - WebSocket 연결 후 새 앱이 열리면 appIcons push 확인
+
+    // MARK: - Task 9: windowList periodic push (1.5초)
+
+    func test_pushInterval_matchesSpec() {
+        // Spec-05 §3-2: windowListPushInterval = 1.5초
+        XCTAssertEqual(windowListPushInterval, 1.5, accuracy: 0.001)
+    }
+
+    func test_windowListResponse_format_hasTypeAndWindows() throws {
+        // push되는 windowList 메시지 형식 검증
+        let windows = [
+            WindowInfo(id: 1, app: "Arc", title: "Tab", pid: 100, frontmost: true)
+        ]
+        let response = WindowListResponse(windows: windows)
+        let data = try JSONEncoder().encode(response)
+        let json = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+
+        XCTAssertEqual(json["type"] as? String, "windowList")
+        let windowArray = json["windows"] as? [[String: Any]]
+        XCTAssertEqual(windowArray?.count, 1)
+    }
+
+    // Note: 주기적 push 실제 동작은 macOS에서 수동 검증
+    // - websocat 연결 후 1.5초마다 windowList 메시지 수신 확인
+    // - 서버 로그: "[INFO] Pushing windowList to N clients"
 }
