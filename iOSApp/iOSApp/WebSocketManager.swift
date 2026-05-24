@@ -248,4 +248,63 @@ final class WebSocketManager: ObservableObject {
         cleanupConnection()
         attemptReconnect()
     }
+
+    // MARK: - Send Methods (Spec-05 §3-1)
+
+    /// JSON 메시지 전송 (공통)
+    /// - Parameter message: Codable 메시지 객체
+    private func sendMessage(_ message: ClientMessage) {
+        guard connectionState == .connected else {
+            print("[WARN] Cannot send message: not connected (state=\(connectionState.rawValue))")
+            return
+        }
+
+        do {
+            let encoder = JSONEncoder()
+            let data = try encoder.encode(message)
+            guard let jsonString = String(data: data, encoding: .utf8) else {
+                print("[ERROR] Failed to encode message as UTF-8")
+                return
+            }
+
+            print("[INFO] Sending action=\(message.action)")
+            webSocketTask?.send(.string(jsonString)) { error in
+                if let error = error {
+                    print("[ERROR] Send failed: \(error.localizedDescription)")
+                }
+            }
+        } catch {
+            print("[ERROR] JSON encode failed: \(error.localizedDescription)")
+        }
+    }
+
+    /// 창 목록 요청 (Spec-05 §3-1: listWindows)
+    func sendListWindows() {
+        sendMessage(ClientMessage(action: "listWindows"))
+    }
+
+    /// 창 활성화 요청 (Spec-05 §3-1: focus)
+    /// - Parameter windowId: 활성화할 창 ID
+    func sendFocus(windowId: Int) {
+        sendMessage(ClientMessage(action: "focus", windowId: windowId))
+    }
+
+    /// 키 입력 요청 (Spec-05 §3-1: key)
+    /// - Parameters:
+    ///   - key: 키 이름
+    ///   - modifiers: modifier 목록 (cmd, shift, alt, ctrl)
+    func sendKey(key: String, modifiers: [String] = []) {
+        sendMessage(ClientMessage(action: "key", key: key, modifiers: modifiers))
+    }
+
+    /// 매크로 아이템으로 키 입력 전송
+    /// - Parameter macro: 매크로 아이템
+    func sendMacro(_ macro: MacroItem) {
+        sendMessage(macro.toClientMessage())
+    }
+
+    /// 권한 상태 요청 (Spec-05 §3-1: getPermissions)
+    func sendGetPermissions() {
+        sendMessage(ClientMessage(action: "getPermissions"))
+    }
 }
