@@ -241,6 +241,81 @@ iOS 사용자 액션 ──► [WebSocketManager] ──JSON──► [WebSocket
 | iOS 앱 | iOS | 17.0+ | 카메라 (QR 스캔, 선택적) |
 | 네트워크 | Wi-Fi LAN | — | 같은 네트워크 필수, 포트 8765 |
 
+### 배포 전략
+
+| 환경 | 대상 | 서명 | 프로비저닝 |
+|------|------|------|-----------|
+| Local | Mac 헬퍼 | 불필요 (개발 중) | 불필요 |
+| Local | iOS 앱 | Development 인증서 | Development Profile |
+| TestFlight | iOS 앱 | Distribution 인증서 | App Store Profile |
+
+### 배포 명령어
+
+#### Mac 헬퍼 — Local
+
+```bash
+# 개발 빌드 + 실행
+cd MacHelper
+swift build
+swift run MacHelper
+
+# Release 빌드
+swift build -c release
+
+# .app 번들로 Archive (Xcode)
+xcodebuild -scheme MacHelper -configuration Release archive \
+  -archivePath build/MacHelper.xcarchive
+
+# Archive에서 .app 추출
+xcodebuild -exportArchive \
+  -archivePath build/MacHelper.xcarchive \
+  -exportPath build/ \
+  -exportOptionsPlist ExportOptions.plist
+```
+
+#### iOS 앱 — Local (실기기 직접 설치)
+
+```bash
+cd iOSApp
+
+# 연결된 기기에 빌드 + 설치
+xcodebuild -scheme iOSApp \
+  -destination 'platform=iOS,name=My iPhone' \
+  -configuration Debug \
+  build
+
+# 또는 Xcode GUI: Product → Run (⌘R) with device selected
+```
+
+#### iOS 앱 — TestFlight
+
+```bash
+cd iOSApp
+
+# 1. Archive 생성
+xcodebuild -scheme iOSApp \
+  -configuration Release \
+  -destination 'generic/platform=iOS' \
+  archive \
+  -archivePath build/iOSApp.xcarchive
+
+# 2. IPA 추출
+xcodebuild -exportArchive \
+  -archivePath build/iOSApp.xcarchive \
+  -exportPath build/ \
+  -exportOptionsPlist ExportOptions-AppStore.plist
+
+# 3. App Store Connect에 업로드
+xcrun altool --upload-app \
+  -f build/iOSApp.ipa \
+  -t ios \
+  -u "developer@example.com" \
+  -p "@keychain:AC_PASSWORD"
+
+# 4. App Store Connect → TestFlight → 테스터 초대
+# (웹 또는 Xcode GUI에서 수행)
+```
+
 ---
 
 ## 9. 변경 이력

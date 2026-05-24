@@ -143,8 +143,23 @@ mac-remote/
 | 설치 방법 | Xcode / USB / Wi-Fi | TestFlight 앱 |
 | 심사 | 없음 | 외부 테스터만 간이 심사 |
 
-### Mac 헬퍼 배포
+### 빠른 명령어
 
-Mac 헬퍼는 App Store 배포 없이 직접 빌드·실행. 필요 시 `.app`으로 Archive해서 공유.
-- 코드 서명 없이도 로컬 실행 가능 (Gatekeeper 경고는 뜸)
-- 배포 시에는 Developer ID 서명 권장
+```bash
+# Mac 헬퍼 — 개발 빌드 + 실행
+cd MacHelper && swift run MacHelper
+
+# Mac 헬퍼 — Release 빌드
+cd MacHelper && swift build -c release
+
+# iOS — 실기기 직접 설치 (Xcode GUI 권장: ⌘R)
+cd iOSApp && xcodebuild -scheme iOSApp -destination 'platform=iOS,name=My iPhone' build
+
+# iOS — TestFlight 업로드
+cd iOSApp
+xcodebuild -scheme iOSApp -configuration Release -destination 'generic/platform=iOS' archive -archivePath build/iOSApp.xcarchive
+xcodebuild -exportArchive -archivePath build/iOSApp.xcarchive -exportPath build/ -exportOptionsPlist ExportOptions-AppStore.plist
+xcrun altool --upload-app -f build/iOSApp.ipa -t ios -u "APPLE_ID" -p "@keychain:AC_PASSWORD"
+```
+
+상세 명령어와 옵션은 `doc/Architecture.md` §8 참조.
