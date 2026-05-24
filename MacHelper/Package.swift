@@ -7,13 +7,18 @@ let package = Package(
         .macOS(.v14)
     ],
     targets: [
+        .target(
+            name: "MacHelperLib",
+            path: "Sources/MacHelperLib"
+        ),
         .executableTarget(
             name: "MacHelper",
-            path: "Sources"
+            dependencies: ["MacHelperLib"],
+            path: "Sources/MacHelper"
         ),
         .testTarget(
             name: "MacHelperTests",
-            dependencies: ["MacHelper"],
+            dependencies: ["MacHelperLib"],
             path: "Tests"
         ),
     ]
