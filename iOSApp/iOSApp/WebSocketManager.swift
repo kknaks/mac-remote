@@ -1,7 +1,8 @@
 import Foundation
 import Combine
+import SwiftUI
 
-// MARK: - Connection State (Spec-05 §4)
+// MARK: - Connection State (Spec-05 §4, Work-13 Task 1)
 
 /// WebSocket 연결 상태
 /// - disconnected: 미연결
@@ -13,6 +14,44 @@ enum ConnectionState: String, Equatable {
     case connecting = "connecting"
     case connected = "connected"
     case reconnecting = "reconnecting"
+
+    // MARK: - UI Properties (Spec-05 §8, Work-13)
+
+    /// 상태별 표시등 색상 (초록/노랑/빨강, Spec-05 §8)
+    var indicatorColor: Color {
+        switch self {
+        case .connected:
+            return .green
+        case .connecting, .reconnecting:
+            return .yellow
+        case .disconnected:
+            return .red
+        }
+    }
+
+    /// 상태별 표시 텍스트 (한국어)
+    var displayText: String {
+        switch self {
+        case .connected:
+            return "연결됨"
+        case .connecting:
+            return "연결 중..."
+        case .reconnecting:
+            return "재연결 중..."
+        case .disconnected:
+            return "연결 끊김"
+        }
+    }
+
+    /// 연결이 끊어진 상태인지 여부 (오버레이 표시 판단용)
+    var isDisconnected: Bool {
+        self == .disconnected
+    }
+
+    /// 연결 시도 중인지 여부 (로딩 인디케이터 표시 판단용)
+    var isAttempting: Bool {
+        self == .connecting || self == .reconnecting
+    }
 }
 
 // MARK: - WebSocket Shared Constants (Spec-05 §3-2)
