@@ -9,18 +9,23 @@ import MacHelperLib
 
 // 1. 권한 확인
 let permissions = PermissionChecker.check()
+
+// 2. 권한 안내 메시지 출력
+printPermissionGuidance(for: permissions)
+
+// 3. 권한 상태 JSON 출력
 let permJSON = formatPermissionJSON(permissions)
 print(permJSON)
 
-// 2. 창 목록 수집
+// 4. 창 목록 수집
 let windows = WindowManager.listWindows()
 
-// 3. Screen Recording 경고 확인
+// 5. Screen Recording 경고 확인
 if !permissions.screenRecording && !windows.isEmpty {
     print("[WARN] 화면 기록 권한을 허용하면 창 제목이 표시됩니다.")
 }
 
-// 4. JSON 출력
+// 6. 창 목록 JSON 출력
 let windowJSON = formatWindowListJSON(windows)
 print(windowJSON)
 
@@ -30,8 +35,9 @@ print("MacHelper CLI Prototype")
 print("Note: macOS APIs not available on this platform.")
 print("Run on macOS for full functionality.")
 
-// 빈 권한 상태 출력
+// 빈 권한 상태 + 안내 메시지 출력
 let permissions = PermissionStatus(accessibility: false, screenRecording: false)
+printPermissionGuidance(for: permissions)
 print(formatPermissionJSON(permissions))
 
 // 빈 창 목록 출력
