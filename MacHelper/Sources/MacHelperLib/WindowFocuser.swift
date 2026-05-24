@@ -96,19 +96,25 @@ public enum WindowFocuser {
 
     // MARK: - Task 2: NSRunningApplication.activate() (Spec-02 §4)
 
-    /// PID 기반 앱 활성화
+    /// PID 기반 앱 활성화 (Spec-02 §4: 앱 활성화 단계)
     /// - Parameter pid: 대상 프로세스 PID
     /// - Returns: 활성화 성공 여부
     /// - Throws: FocusError.processDead if process not found
+    ///
+    /// Spec-02 §9 #1: 이미 frontmost인 경우에도 activate()는 true를 반환
+    /// Spec-02 §5 PROCESS_DEAD: NSRunningApplication 생성 실패 시 프로세스 종료로 판단
     public static func activateApp(pid: Int) throws -> Bool {
         guard let app = NSRunningApplication(processIdentifier: pid_t(pid)) else {
             print("[ERROR] Process dead: pid=\(pid)")
             throw FocusError.processDead(pid: pid)
         }
+
+        // 이미 active인 경우에도 activate 호출 (Spec-02 §9 #1: 아무 변화 없음, ack:true)
         let activated = app.activate(options: [.activateIgnoringOtherApps])
         if activated {
-            print("[INFO] App activated: pid=\(pid)")
+            print("[INFO] App activated: pid=\(pid), wasActive=\(app.isActive)")
         } else {
+            // activate가 false를 반환하는 경우: 프로세스가 종료 중이거나 할 수 없는 상태
             print("[WARN] App activation returned false: pid=\(pid)")
         }
         return activated
