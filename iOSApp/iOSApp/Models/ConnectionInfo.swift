@@ -108,6 +108,50 @@ extension ConnectionInfo {
     }
 }
 
+// MARK: - ConnectionInfo UserDefaults Store (Spec-07 §4, Work-12 Task 4)
+
+/// ConnectionInfo의 UserDefaults 저장/로드
+/// 앱 재실행 시 저장된 정보로 자동 연결을 시도한다 (Spec-07 §9-2)
+enum ConnectionInfoStore {
+    /// UserDefaults 키
+    private static let hostKey = "connection_host"
+    private static let portKey = "connection_port"
+
+    /// 연결 정보 저장
+    /// - Parameter info: 저장할 ConnectionInfo
+    static func save(_ info: ConnectionInfo) {
+        UserDefaults.standard.set(info.host, forKey: hostKey)
+        UserDefaults.standard.set(Int(info.port), forKey: portKey)
+        print("[INFO] ConnectionInfo saved: \(info.displayString)")
+    }
+
+    /// 저장된 연결 정보 로드
+    /// - Returns: 저장된 ConnectionInfo, 없으면 nil
+    static func load() -> ConnectionInfo? {
+        guard let host = UserDefaults.standard.string(forKey: hostKey),
+              !host.isEmpty else {
+            return nil
+        }
+
+        let portValue = UserDefaults.standard.integer(forKey: portKey)
+        let port: UInt16 = portValue > 0 ? UInt16(portValue) : wsDefaultPort
+
+        return ConnectionInfo(host: host, port: port)
+    }
+
+    /// 저장된 연결 정보 삭제
+    static func clear() {
+        UserDefaults.standard.removeObject(forKey: hostKey)
+        UserDefaults.standard.removeObject(forKey: portKey)
+        print("[INFO] ConnectionInfo cleared")
+    }
+
+    /// 저장된 연결 정보 존재 여부
+    static var hasSaved: Bool {
+        load() != nil
+    }
+}
+
 // MARK: - QR Parsing Error (Spec-07 §5)
 
 /// QR/수동입력 파싱 에러 유형
