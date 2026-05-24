@@ -456,6 +456,48 @@ final class MessageHandlerTests: XCTestCase {
         XCTAssertEqual(json["error"] as? String, "INVALID_JSON")
     }
 
+    // MARK: - Work-17: holdModifiers / releaseModifiers routing (Spec-03 §3-1)
+
+    func test_handle_holdModifiers_validCmd_returnsAck() {
+        #if canImport(CoreGraphics)
+        defer { KeySender.heldStore.releaseAll() }
+        #endif
+        let response = handler.handle(#"{"action":"holdModifiers","modifiers":["cmd"]}"#)
+        let json = parseJSON(response)
+
+        XCTAssertEqual(json["type"] as? String, "ack")
+        XCTAssertEqual(json["action"] as? String, "holdModifiers")
+        // AX 권한 없을 수 있어 ok는 false일 수 있음 — 형식만 확인
+        XCTAssertNotNil(json["ok"])
+    }
+
+    func test_handle_holdModifiers_missingModifiers_returnsAckFalse() {
+        let response = handler.handle(#"{"action":"holdModifiers"}"#)
+        let json = parseJSON(response)
+
+        XCTAssertEqual(json["action"] as? String, "holdModifiers")
+        XCTAssertEqual(json["ok"] as? Bool, false)
+        XCTAssertEqual(json["error"] as? String, "missing modifiers")
+    }
+
+    func test_handle_holdModifiers_emptyArray_returnsAckFalse() {
+        let response = handler.handle(#"{"action":"holdModifiers","modifiers":[]}"#)
+        let json = parseJSON(response)
+
+        XCTAssertEqual(json["action"] as? String, "holdModifiers")
+        XCTAssertEqual(json["ok"] as? Bool, false)
+    }
+
+    func test_handle_releaseModifiers_returnsAck() {
+        let response = handler.handle(#"{"action":"releaseModifiers"}"#)
+        let json = parseJSON(response)
+
+        XCTAssertEqual(json["type"] as? String, "ack")
+        XCTAssertEqual(json["action"] as? String, "releaseModifiers")
+        // Spec-03 §9 #7: 빈 상태에서도 멱등 → ok:true
+        XCTAssertEqual(json["ok"] as? Bool, true)
+    }
+
     // MARK: - Helper
 
     private func parseJSON(_ string: String) -> [String: Any] {

@@ -94,7 +94,7 @@ public final class MessageHandler {
 
         print("[INFO] Handling action=\(message.action)")
 
-        // Step 2: action 분기 (Spec-05 §3-1)
+        // Step 2: action 분기 (Spec-05 §3-1, Spec-03 §3-1)
         switch message.action {
         case "listWindows":
             return handleListWindows()
@@ -102,6 +102,10 @@ public final class MessageHandler {
             return handleFocus(message: message)
         case "key":
             return handleKey(message: message)
+        case "holdModifiers":
+            return handleHoldModifiers(message: message)
+        case "releaseModifiers":
+            return handleReleaseModifiers()
         case "getPermissions":
             return handleGetPermissions()
         default:
@@ -159,6 +163,45 @@ public final class MessageHandler {
         }
         #else
         return encodeKeyAck(ok: true)
+        #endif
+    }
+
+    /// holdModifiers 핸들러 (Work-17, Spec-03 §3-1)
+    public func handleHoldModifiers(message: ClientMessage) -> String {
+        guard let raw = message.modifiers, !raw.isEmpty else {
+            return encodeAckJSON(action: "holdModifiers", ok: false, error: "missing modifiers")
+        }
+        #if canImport(CoreGraphics)
+        // Spec-03 §5 INVALID_MODIFIER: 잘못된 modifier는 무시
+        let mods = raw.compactMap { Modifier(rawValue: $0) }
+        guard !mods.isEmpty else {
+            return encodeAckJSON(action: "holdModifiers", ok: false, error: "no valid modifiers")
+        }
+        let result = KeySender.holdModifiers(mods)
+        switch result {
+        case .success:
+            return encodeAckJSON(action: "holdModifiers", ok: true)
+        case .failure(let error):
+            return encodeAckJSON(action: "holdModifiers", ok: false, error: error.description)
+        }
+        #else
+        return encodeAckJSON(action: "holdModifiers", ok: true)
+        #endif
+    }
+
+    /// releaseModifiers 핸들러 (Work-17, Spec-03 §3-1)
+    /// Spec-03 §9 #7: 빈 상태에서도 멱등 → ack:true
+    public func handleReleaseModifiers() -> String {
+        #if canImport(CoreGraphics)
+        let result = KeySender.releaseModifiers()
+        switch result {
+        case .success:
+            return encodeAckJSON(action: "releaseModifiers", ok: true)
+        case .failure(let error):
+            return encodeAckJSON(action: "releaseModifiers", ok: false, error: error.description)
+        }
+        #else
+        return encodeAckJSON(action: "releaseModifiers", ok: true)
         #endif
     }
 
