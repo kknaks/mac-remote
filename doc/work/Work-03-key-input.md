@@ -55,6 +55,15 @@
 | 2 | ⌘⇧4 전송 | `swift run MacHelper key 4 cmd shift` → 스크린샷 모드 진입 | — |
 | 3 | 알 수 없는 키 | `swift run MacHelper key xyz` → 에러 메시지 | — |
 
+### 로그 추적 포인트
+
+| # | 위치 (파일/함수) | 로그 레벨 | 로그 내용 | 확인 방법 |
+|---|-----------------|-----------|-----------|-----------|
+| 1 | KeySender.send() | INFO | "Sending key={key} modifiers={mods}" | 콘솔 |
+| 2 | KeySender.send() | ERROR | "Unknown key: {key}" | 콘솔 |
+| 3 | KeySender.send() | ERROR | "CGEvent creation failed" | 콘솔 |
+| 4 | KeySender.send() | ERROR | "Accessibility permission denied" | 콘솔 |
+
 ---
 
 ## 6. 변경 이력

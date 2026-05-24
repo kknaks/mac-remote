@@ -60,6 +60,16 @@
 | 4 | 권한 미허용 | 화면 기록 권한 해제 후 실행 → 창 제목 빈 문자열 + 경고 로그 | — |
 | 5 | Accessibility 미허용 | 손쉬운 사용 권한 해제 후 실행 → 안내 메시지 출력 | — |
 
+### 로그 추적 포인트
+
+| # | 위치 (파일/함수) | 로그 레벨 | 로그 내용 | 확인 방법 |
+|---|-----------------|-----------|-----------|-----------|
+| 1 | WindowManager.listWindows() | INFO | 수집된 전체 창 수 + 필터 후 창 수 | 콘솔 |
+| 2 | WindowManager.listWindows() | WARN | Screen Recording 권한 없음 → 창 제목 빈 문자열 감지 | 콘솔 |
+| 3 | PermissionChecker.check() | ERROR | Accessibility 권한 거부 | 콘솔 |
+| 4 | WindowManager.listWindows() | WARN | CGWindowListCopyWindowInfo null 반환 | 콘솔 |
+| 5 | 필터링 | INFO | 제외된 시스템 프로세스 목록 (디버그용) | 콘솔 (verbose) |
+
 ---
 
 ## 6. 변경 이력

@@ -54,6 +54,16 @@
 | 2 | 개별 창 raise | 같은 앱 창 2개 열고 뒤쪽 창 windowId로 실행 → 해당 창이 앞으로 | — |
 | 3 | 없는 windowId | 존재하지 않는 ID 입력 → 에러 메시지 | — |
 
+### 로그 추적 포인트
+
+| # | 위치 (파일/함수) | 로그 레벨 | 로그 내용 | 확인 방법 |
+|---|-----------------|-----------|-----------|-----------|
+| 1 | WindowFocuser.focus() | INFO | "Focusing windowId={id}, pid={pid}" | 콘솔 |
+| 2 | WindowFocuser.focus() | ERROR | "Window not found: {id}" | 콘솔 |
+| 3 | WindowFocuser.focus() | ERROR | "Process dead: pid={pid}" | 콘솔 |
+| 4 | WindowFocuser.axRaise() | WARN | "AXRaise failed, app activated only" | 콘솔 |
+| 5 | WindowFocuser.focus() | ERROR | "Accessibility permission denied" | 콘솔 |
+
 ---
 
 ## 6. 변경 이력

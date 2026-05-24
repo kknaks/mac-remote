@@ -56,6 +56,17 @@
 | 2 | 메시지 수신 | windowList push 수신 확인 (디버그 로그) | — |
 | 3 | 재연결 | Mac 헬퍼 종료 → 재시작 → 자동 재연결 | — |
 
+### 로그 추적 포인트
+
+| # | 위치 (파일/함수) | 로그 레벨 | 로그 내용 | 확인 방법 |
+|---|-----------------|-----------|-----------|-----------|
+| 1 | WebSocketManager.connect() | INFO | "Connecting to ws://{host}:{port}" | Xcode 콘솔 |
+| 2 | WebSocketManager.connect() | INFO | "Connected successfully" | Xcode 콘솔 |
+| 3 | WebSocketManager.receive() | ERROR | "Connection lost: {error}" | Xcode 콘솔 |
+| 4 | WebSocketManager.reconnect() | WARN | "Reconnecting attempt {n}/{max}" | Xcode 콘솔 |
+| 5 | WebSocketManager.receive() | ERROR | "JSON decode failed: {error}" | Xcode 콘솔 |
+| 6 | WebSocketManager.send() | INFO | "Sending action={action}" | Xcode 콘솔 (verbose) |
+
 ---
 
 ## 6. 변경 이력

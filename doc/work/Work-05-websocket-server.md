@@ -63,6 +63,18 @@
 | 5 | key | `{"action":"key","key":"c","modifiers":["cmd"]}` 전송 → ack | — |
 | 6 | 주기적 push | 연결 유지 → 1.5초마다 windowList 수신 확인 | — |
 
+### 로그 추적 포인트
+
+| # | 위치 (파일/함수) | 로그 레벨 | 로그 내용 | 확인 방법 |
+|---|-----------------|-----------|-----------|-----------|
+| 1 | WebSocketServer.start() | INFO | "WebSocket server started on port {port}" | 콘솔 |
+| 2 | WebSocketServer.onConnect() | INFO | "Client connected: {address}" | 콘솔 |
+| 3 | WebSocketServer.onDisconnect() | INFO | "Client disconnected: {address}" | 콘솔 |
+| 4 | MessageHandler.handle() | WARN | "Unknown action: {action}" | 콘솔 |
+| 5 | MessageHandler.handle() | ERROR | "Invalid JSON received" | 콘솔 |
+| 6 | MessageHandler.handle() | INFO | "Handling action={action}" | 콘솔 (verbose) |
+| 7 | PushTimer | INFO | "Pushing windowList to {n} clients" | 콘솔 (verbose) |
+
 ---
 
 ## 6. 변경 이력
