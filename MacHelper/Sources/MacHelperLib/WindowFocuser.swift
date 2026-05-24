@@ -122,15 +122,25 @@ public enum WindowFocuser {
 
     // MARK: - Task 3: AXUIElement 기반 창 Raise (Spec-02 §4)
 
-    /// AXUIElement를 사용하여 특정 창을 Raise
+    /// AXUIElement를 사용하여 특정 창을 Raise (Spec-02 §4: AX 창 Raise 단계)
+    ///
+    /// 동작 흐름:
+    /// 1. AXIsProcessTrusted() 권한 확인 → 없으면 false (Spec-02 §5 AX_PERMISSION)
+    /// 2. AXUIElementCreateApplication(pid) → kAXWindowsAttribute로 창 목록 조회
+    /// 3. _kCGWindowNumber로 대상 창 매칭
+    /// 4. kAXRaiseAction 수행 → 실패 시 100ms 후 1회 재시도 (Spec-02 §5 AX_RAISE_FAIL)
+    ///
     /// - Parameters:
     ///   - windowId: 대상 창의 kCGWindowNumber
     ///   - pid: 대상 프로세스 PID
     /// - Returns: AXRaise 성공 여부
+    ///
+    /// Spec-02 §9 #3: 같은 앱 창 5개 → AXRaise로 정확한 창 활성화
+    /// Spec-02 §9 #4: Accessibility 권한 없음 → 앱만 활성화, 특정 창 선택 불가
     public static func axRaiseWindow(windowId: Int, pid: Int) -> Bool {
-        // Accessibility 권한 확인
+        // Spec-02 §5 AX_PERMISSION: Accessibility 권한 확인
         guard AXIsProcessTrusted() else {
-            print("[WARN] AXRaise failed, app activated only — Accessibility permission denied")
+            print("[ERROR] Accessibility permission denied")
             return false
         }
 
@@ -159,8 +169,8 @@ public enum WindowFocuser {
                     print("[INFO] AXRaise succeeded: windowId=\(windowId)")
                     return true
                 } else {
-                    print("[WARN] AXRaise action failed: windowId=\(windowId), error=\(raiseResult)")
-                    // Spec-02 §5: AX_RAISE_FAIL — 1회 재시도 (100ms 후)
+                    print("[WARN] AXRaise action failed: windowId=\(windowId), error=\(raiseResult.rawValue)")
+                    // Spec-02 §5: AX_RAISE_FAIL — 1회 재시도, 100ms 간격
                     usleep(100_000)  // 100ms
                     let retryResult = AXUIElementPerformAction(axWindow, kAXRaiseAction as CFString)
                     if retryResult == .success {
