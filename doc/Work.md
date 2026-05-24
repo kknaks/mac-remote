@@ -25,7 +25,7 @@
 | Work-03 | M3: 키 입력 | | Done | 2026-05-24 | 2026-05-24 | Work-01 | Spec-03 |
 | Work-04 | M4: 앱 아이콘 추출 | | Done | 2026-05-24 | 2026-05-24 | Work-01 | Spec-04 |
 | Work-05 | M5: WebSocket 서버 | | Done | 2026-05-24 | 2026-05-24 | Work-01, Work-02, Work-03, Work-04 | Spec-05 |
-| Work-06 | M6: 메뉴바 앱화 | | Backlog | | | Work-05 | Spec-06 |
+| Work-06 | M6: 메뉴바 앱화 | | Done | 2026-05-24 | 2026-05-24 | Work-05 | Spec-06 |
 | Work-07 | M7: 페어링 QR | | Backlog | | | Work-06 | Spec-07 |
 
 ### iOS 앱 (I1~I6)
@@ -91,3 +91,4 @@ Work-01 (CLI) ──► Work-02 (창 활성화)
 | 2026-05-24 | Work-02 완료 (Done) |
 | 2026-05-24 | Work-05 완료 (Done) |
 | 2026-05-24 | Work-08 완료 (Done) |
+| 2026-05-24 | Work-06 완료 (Done) |
