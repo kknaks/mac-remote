@@ -1,6 +1,7 @@
-// MacHelperAppEntry.swift — 메뉴바 앱 엔트리 포인트 (Work-06 Task 2, 5)
+// MacHelperAppEntry.swift — 메뉴바 앱 엔트리 포인트 (Work-06 Task 2, 5, 6)
 // macOS 14+ SwiftUI App 프로토콜 사용
 // Info.plist LSUIElement=true로 Dock 아이콘 숨김
+// 앱 시작 시 WebSocket 서버 자동 시작
 
 #if canImport(SwiftUI) && canImport(AppKit)
 import SwiftUI
@@ -9,26 +10,31 @@ import MacHelperLib
 
 /// MacHelper 메뉴바 앱 엔트리 포인트
 /// MenuBarExtra로 메뉴바에 상태 아이콘과 메뉴를 표시한다.
+/// 앱 시작 시 WebSocket 서버가 자동으로 시작된다 (Work-06 Task 6)
 @available(macOS 14.0, *)
 @main
 struct MacHelperApp: App {
-    @State private var appState = AppState()
-    @State private var server: WebSocketServer?
+    /// 앱 생명주기 관리자 — 서버 자동 시작, 권한 확인, 상태 갱신
+    @State private var lifecycle = AppLifecycleManager()
 
     var body: some Scene {
         // MenuBarExtra: 메뉴바에 아이콘과 메뉴 표시 (Work-06 Task 2)
         MenuBarExtra {
-            MenuBarContentView(appState: appState, onQuit: {
-                server?.stop()
+            MenuBarContentView(appState: lifecycle.appState, onQuit: {
+                lifecycle.stop()
                 NSApplication.shared.terminate(nil)
             }, onOpenAccessibilitySettings: {
                 SystemSettingsOpener.openAccessibilitySettings()
             }, onOpenScreenRecordingSettings: {
                 SystemSettingsOpener.openScreenRecordingSettings()
             })
+            .onAppear {
+                // Task 6: 앱 시작 시 서버 자동 시작
+                lifecycle.start()
+            }
         } label: {
-            // 메뉴바 아이콘 (SF Symbol)
-            Image(systemName: appState.menuBarIconName)
+            // 메뉴바 아이콘 (SF Symbol) — 상태에 따라 변경
+            Image(systemName: lifecycle.appState.menuBarIconName)
         }
     }
 }
