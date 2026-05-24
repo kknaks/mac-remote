@@ -22,6 +22,12 @@ let package = Package(
             dependencies: ["MacHelperLib"],
             path: "Sources/MacHelper"
         ),
+        .executableTarget(
+            name: "MacHelperApp",
+            dependencies: ["MacHelperLib"],
+            path: "Sources/MacHelperApp",
+            exclude: ["Info.plist"]
+        ),
         .testTarget(
             name: "MacHelperTests",
             dependencies: ["MacHelperLib"],

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Work-06 Task 5: Dock 아이콘 숨김 -->
+    <key>LSUIElement</key>
+    <true/>
+    <key>CFBundleName</key>
+    <string>MacHelper</string>
+    <key>CFBundleDisplayName</key>
+    <string>MacHelper</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.macremote.machelper</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>14.0</string>
+</dict>
+</plist>
