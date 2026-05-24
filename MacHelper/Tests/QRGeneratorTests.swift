@@ -68,4 +68,25 @@ final class QRGeneratorTests: XCTestCase {
         let _: QRGenerator.Type = QRGenerator.self
         XCTAssertTrue(true)
     }
+
+    func test_qrGenerator_currentConnectionInfo() {
+        let info = QRGenerator.currentConnectionInfo(port: 9999)
+        XCTAssertEqual(info.port, 9999)
+        // Linux에서는 "localhost", macOS에서는 실제 IP
+        XCTAssertFalse(info.host.isEmpty)
+    }
+
+    func test_qrGenerator_currentConnectionInfo_defaultPort() {
+        let info = QRGenerator.currentConnectionInfo()
+        XCTAssertEqual(info.port, defaultPort)
+    }
+
+    func test_qrGenerator_defaultQRSize() {
+        XCTAssertEqual(QRGenerator.defaultQRSize, 200)
+    }
+
+    // QR 이미지 생성 (macOS 전용) — Linux에서는 스킵
+    // generateQRImage, scaleQRImage, generateNSImage는
+    // #if canImport(CoreImage) / canImport(AppKit) 가드 내부
+    // → 수동 검증 (macOS 필요)
 }

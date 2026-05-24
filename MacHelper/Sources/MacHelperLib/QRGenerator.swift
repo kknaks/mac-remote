@@ -4,6 +4,10 @@ import Foundation
 import CoreImage
 #endif
 
+#if canImport(AppKit)
+import AppKit
+#endif
+
 // MARK: - ConnectionInfo (Spec-07 §2)
 
 /// 페어링 연결 정보 모델
@@ -70,4 +74,28 @@ public enum QRGenerator {
         return image.transformed(by: CGAffineTransform(scaleX: scaleX, y: scaleY))
     }
     #endif
+
+    #if canImport(AppKit) && canImport(CoreImage)
+    /// QR 코드를 NSImage로 생성 (메뉴바 팝오버 표시용)
+    /// CIImage → NSBitmapImageRep → NSImage 변환
+    /// - Parameters:
+    ///   - connectionInfo: 인코딩할 연결 정보
+    ///   - size: 이미지 크기 (기본 200pt)
+    /// - Returns: QR 코드 NSImage, 생성 실패 시 nil
+    public static func generateNSImage(
+        for connectionInfo: ConnectionInfo,
+        size: CGFloat = 200
+    ) -> NSImage? {
+        guard let ciImage = generateQRImage(for: connectionInfo) else { return nil }
+        let scaled = scaleQRImage(ciImage, to: size)
+
+        let rep = NSCIImageRep(ciImage: scaled)
+        let nsImage = NSImage(size: rep.size)
+        nsImage.addRepresentation(rep)
+        return nsImage
+    }
+    #endif
+
+    /// QR 이미지 기본 크기 (포인트)
+    public static let defaultQRSize: CGFloat = 200
 }
