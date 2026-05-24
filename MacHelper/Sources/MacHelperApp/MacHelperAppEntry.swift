@@ -18,7 +18,8 @@ struct MacHelperApp: App {
     @State private var lifecycle = AppLifecycleManager()
 
     var body: some Scene {
-        // MenuBarExtra: 메뉴바에 아이콘과 메뉴 표시 (Work-06 Task 2)
+        // MenuBarExtra: 메뉴바에 아이콘과 팝오버 윈도우 표시
+        // .window 스타일: QR 이미지 등 커스텀 SwiftUI 뷰 지원 (Work-07 Task 3)
         MenuBarExtra {
             MenuBarContentView(appState: lifecycle.appState, onQuit: {
                 lifecycle.stop()
@@ -36,6 +37,7 @@ struct MacHelperApp: App {
             // 메뉴바 아이콘 (SF Symbol) — 상태에 따라 변경
             Image(systemName: lifecycle.appState.menuBarIconName)
         }
+        .menuBarExtraStyle(.window)
     }
 }
 #else

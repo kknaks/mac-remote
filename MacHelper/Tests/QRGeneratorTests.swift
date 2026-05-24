@@ -89,4 +89,32 @@ final class QRGeneratorTests: XCTestCase {
     // generateQRImage, scaleQRImage, generateNSImage는
     // #if canImport(CoreImage) / canImport(AppKit) 가드 내부
     // → 수동 검증 (macOS 필요)
+
+    // MARK: - Task 3: 메뉴바 QR 표시 검증
+
+    // QRCodeView, MenuBarContentView는 SwiftUI + AppKit 필요
+    // 아래는 표시에 사용되는 데이터 로직만 검증
+
+    func test_qrDisplay_webSocketURL_matchesExpected() {
+        let info = ConnectionInfo(host: "192.168.1.10", port: 8765)
+        // QRCodeView에서 표시할 URL 텍스트
+        XCTAssertEqual(info.webSocketURL, "ws://192.168.1.10:8765")
+    }
+
+    func test_qrDisplay_currentInfo_hasValidURL() {
+        let info = QRGenerator.currentConnectionInfo(port: 8765)
+        let url = info.webSocketURL
+        // ws:// prefix + host + : + port 형식
+        XCTAssertTrue(url.hasPrefix("ws://"))
+        XCTAssertTrue(url.contains(":8765"))
+    }
+
+    func test_appState_fullAddressText_matchesQRHost() {
+        // AppState.fullAddressText와 ConnectionInfo.webSocketURL의 host:port가 일치
+        let state = AppState(port: 8765)
+        let ip = "192.168.1.10"
+        let info = ConnectionInfo(host: ip, port: 8765)
+        XCTAssertEqual(state.fullAddressText(ip: ip), "\(ip):8765")
+        XCTAssertEqual(info.webSocketURL, "ws://\(ip):8765")
+    }
 }
