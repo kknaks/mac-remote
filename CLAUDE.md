@@ -120,3 +120,31 @@ mac-remote/
         ├── doc-status/SKILL.md
         └── work-run/SKILL.md
 ```
+
+---
+
+## 배포 전략
+
+| 환경 | 대상 | 방법 | 비고 |
+|------|------|------|------|
+| **Local** | Mac 헬퍼 | `swift build` → 직접 실행 또는 Xcode Archive | 개발 중 기본 |
+| **Local** | iOS 앱 | Xcode → USB/Wi-Fi 직접 설치 | 실기기 필수 (시뮬레이터는 WebSocket만 테스트 가능) |
+| **TestFlight** | iOS 앱 | Xcode → Archive → App Store Connect 업로드 → TestFlight 배포 | 내부 테스터 즉시, 외부 테스터는 간이 심사 |
+
+### 배포별 차이
+
+| | Local | TestFlight |
+|---|-------|------------|
+| 계정 | 유료 Apple Developer | 유료 Apple Developer |
+| 서명 | Development 인증서 | Distribution 인증서 |
+| 프로비저닝 | Development Profile | App Store Profile |
+| 설치 범위 | 등록된 기기만 | 초대된 테스터 (내부 100명 / 외부 10,000명) |
+| 유효 기간 | 기기 등록 유지 시 무제한 | 빌드당 90일 |
+| 설치 방법 | Xcode / USB / Wi-Fi | TestFlight 앱 |
+| 심사 | 없음 | 외부 테스터만 간이 심사 |
+
+### Mac 헬퍼 배포
+
+Mac 헬퍼는 App Store 배포 없이 직접 빌드·실행. 필요 시 `.app`으로 Archive해서 공유.
+- 코드 서명 없이도 로컬 실행 가능 (Gatekeeper 경고는 뜸)
+- 배포 시에는 Developer ID 서명 권장
