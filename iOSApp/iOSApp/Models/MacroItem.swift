@@ -1,31 +1,57 @@
 import Foundation
 
-/// 매크로 모델 (Spec-03 기반, Work-11에서 상세 구현)
+/// 매크로 모델 (Spec-03 기반, Work-11)
 /// 사용자가 등록한 단축키 매크로 정보
+/// - name: 표시 이름
+/// - key: 키 이름 ("c", "v", "z", "tab", "4" 등, Spec-03 §2 VirtualKeyMap 참조)
+/// - modifiers: modifier 목록 ["cmd", "shift", "alt", "ctrl"] (Spec-03 §3-2)
+/// - icon: SF Symbol 이름
+/// - isUserDefined: 사용자 정의 매크로 여부 (false = 기본 프리셋)
 struct MacroItem: Codable, Equatable, Identifiable {
     var id: UUID = UUID()
     let name: String
     let key: String
     let modifiers: [String]
     let icon: String
+    let isUserDefined: Bool
 
-    init(name: String, key: String, modifiers: [String] = [], icon: String = "command") {
+    init(name: String, key: String, modifiers: [String] = [], icon: String = "command", isUserDefined: Bool = false) {
         self.id = UUID()
         self.name = name
         self.key = key
         self.modifiers = modifiers
         self.icon = icon
+        self.isUserDefined = isUserDefined
     }
 
-    /// ClientMessage로 변환 (전송용)
+    /// ClientMessage로 변환 (전송용, Spec-03 §3-1)
+    /// {"action":"key","key":"c","modifiers":["cmd"]}
     func toClientMessage() -> ClientMessage {
         return ClientMessage(action: "key", key: key, modifiers: modifiers)
+    }
+
+    /// modifier 문자열을 기호로 변환 (UI 표시용)
+    var modifierSymbols: String {
+        modifiers.map { modifier in
+            switch modifier {
+            case "cmd": return "\u{2318}"    // ⌘
+            case "shift": return "\u{21E7}"  // ⇧
+            case "alt": return "\u{2325}"    // ⌥
+            case "ctrl": return "\u{2303}"   // ⌃
+            default: return modifier
+            }
+        }.joined()
+    }
+
+    /// 키 표시 문자열 (예: "⌘C", "⌃⌘Q")
+    var shortcutLabel: String {
+        modifierSymbols + key.uppercased()
     }
 
     // MARK: - Codable (id 제외)
 
     enum CodingKeys: String, CodingKey {
-        case name, key, modifiers, icon
+        case name, key, modifiers, icon, isUserDefined
     }
 
     init(from decoder: Decoder) throws {
@@ -35,19 +61,6 @@ struct MacroItem: Codable, Equatable, Identifiable {
         self.key = try container.decode(String.self, forKey: .key)
         self.modifiers = try container.decodeIfPresent([String].self, forKey: .modifiers) ?? []
         self.icon = try container.decodeIfPresent(String.self, forKey: .icon) ?? "command"
+        self.isUserDefined = try container.decodeIfPresent(Bool.self, forKey: .isUserDefined) ?? false
     }
-}
-
-// MARK: - 기본 매크로 프리셋
-
-extension MacroItem {
-    /// 기본 매크로 목록 (Work-11에서 사용)
-    static let defaults: [MacroItem] = [
-        MacroItem(name: "복사", key: "c", modifiers: ["cmd"], icon: "doc.on.doc"),
-        MacroItem(name: "붙여넣기", key: "v", modifiers: ["cmd"], icon: "doc.on.clipboard"),
-        MacroItem(name: "실행취소", key: "z", modifiers: ["cmd"], icon: "arrow.uturn.backward"),
-        MacroItem(name: "저장", key: "s", modifiers: ["cmd"], icon: "square.and.arrow.down"),
-        MacroItem(name: "전체선택", key: "a", modifiers: ["cmd"], icon: "selection.pin.in.out"),
-        MacroItem(name: "찾기", key: "f", modifiers: ["cmd"], icon: "magnifyingglass"),
-    ]
 }
