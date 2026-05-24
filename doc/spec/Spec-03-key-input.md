@@ -229,16 +229,17 @@ enum Modifier: String {
 |------|--------|-----------|--------|
 | 매크로 실행 | 버튼 탭 | Mac에서 해당 키 조합 실행 | 햅틱 (성공 시) |
 | 매크로 추가 | "매크로 추가" 버튼 | 키 + modifier 선택 화면 | — |
-| Hold 모드 진입 | `holdMode:true` 매크로 길게 누름 | modifier hold + 초기 key 전송, hold 오버레이 표시 | 햅틱 |
+| Hold 모드 진입 | `holdMode:true` 매크로 **단발 탭** | modifier hold + 초기 key 전송, hold 오버레이 표시 | 햅틱 (강) |
 | Hold 중 다음/이전 | 오버레이의 ▶/◀ 탭 | 동일 key 또는 Shift+key 단발 전송 | 햅틱 |
-| Hold 종료 (선택) | 오버레이 ✓ 또는 손가락 떼기 | releaseModifiers 전송 | 햅틱 |
-| Hold 종료 (취소) | 오버레이 ✕ | Esc 단발 + releaseModifiers 전송 | 햅틱 |
+| Hold 종료 (선택) | 오버레이 ✓ | releaseModifiers 전송 | 햅틱 |
+| Hold 종료 (취소) | 오버레이 ✕ 또는 배경 탭 | Esc 단발 + releaseModifiers 전송 | 햅틱 |
 
 ### Hold 모드 UI 컴포넌트 (iOS)
 
-매크로 모델에 `holdMode: Bool` 플래그 추가. true인 매크로는 길게 누르기 시 hold 오버레이가 뜬다.
+매크로 모델에 `holdMode: Bool` 플래그 추가. true인 매크로는 **단발 탭** 시 일반 매크로처럼 단일 키 전송이 아니라 **hold 오버레이가 뜨면서** modifier hold + 초기 key가 전송된다.
 - 오버레이는 화면 중앙 모달, 4개 버튼: ◀ / ▶ / ✓ / ✕
 - 기본 프리셋 "앱전환"(⌘+Tab)에 `holdMode: true` 적용 권장
+- 단발 vs hold 분기는 매크로 단위로 결정 (long-press 같은 별도 제스처 불필요)
 
 ---
 

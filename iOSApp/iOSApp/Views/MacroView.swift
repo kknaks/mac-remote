@@ -39,7 +39,6 @@ struct MacroView: View {
                                 MacroButtonView(macro: macro) {
                                     executeMacro(macro)
                                 }
-                                .simultaneousGesture(longPressGesture(for: macro))
                             }
                         }
 
@@ -52,7 +51,6 @@ struct MacroView: View {
                                     MacroButtonView(macro: macro) {
                                         executeMacro(macro)
                                     }
-                                    .simultaneousGesture(longPressGesture(for: macro))
                                     .contextMenu {
                                         Button {
                                             editingMacro = macro
@@ -144,23 +142,17 @@ struct MacroView: View {
 
     // MARK: - Macro Actions
 
-    /// 매크로 실행: WebSocket으로 key 명령 전송 + 햅틱 (Work-11 Task 4)
+    /// 매크로 실행: holdMode면 hold 모드 진입, 아니면 일반 단발 전송 (Work-11 Task 4, Work-17)
     private func executeMacro(_ macro: MacroItem) {
-        wsManager.sendMacro(macro)
-        triggerHaptic()
+        if macro.holdMode {
+            startHoldMode(macro)
+        } else {
+            wsManager.sendMacro(macro)
+            triggerHaptic()
+        }
     }
 
     // MARK: - Hold Mode (Work-17)
-
-    /// holdMode 매크로 long-press 감지용 제스처
-    private func longPressGesture(for macro: MacroItem) -> some Gesture {
-        LongPressGesture(minimumDuration: 0.4)
-            .onEnded { _ in
-                if macro.holdMode {
-                    startHoldMode(macro)
-                }
-            }
-    }
 
     /// Hold 모드 진입 — modifier hold + 초기 key 전송 + 오버레이 표시
     private func startHoldMode(_ macro: MacroItem) {
