@@ -34,7 +34,7 @@ public final class ClientSession {
 public final class WebSocketServer {
     private let server = HttpServer()
     private let port: UInt16
-    private var clients: [String: ClientSession] = []
+    private var clients: [String: ClientSession] = [:]
     private let clientsLock = NSLock()
     private var pushTimer: Timer?
 
@@ -119,7 +119,19 @@ public final class WebSocketServer {
             clients.removeValue(forKey: id)
             print("[INFO] Client disconnected: \(id)")
         }
+        let remaining = clients.count
         clientsLock.unlock()
+
+        // Work-17, Spec-03 §9 #5: 마지막 클라이언트 끊김 시 hold 자동 해제 (안전장치)
+        if remaining == 0 {
+            #if canImport(CoreGraphics)
+            let prior = KeySender.heldStore.current
+            if !prior.isEmpty {
+                print("[INFO] Last client disconnected — auto-releasing held modifiers")
+                KeySender.releaseModifiers()
+            }
+            #endif
+        }
     }
 
     // MARK: - Message Handling
