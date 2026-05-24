@@ -268,4 +268,27 @@ final class IconExtractorTests: XCTestCase {
         let newApps2 = cache.filterNew(allApps2)
         XCTAssertEqual(newApps2, ["Terminal"])  // Only Terminal is new
     }
+
+    func test_workflow_appTerminatedAndRelaunched_notResent() {
+        // Spec-04 §9 #2: 앱 종료 후 재실행 → 캐시에 있으므로 재전송 안 함
+        let cache = IconCache()
+        cache.set("Safari", iconData: "icon_safari")
+
+        // Safari가 종료되었다가 다시 나타남 (PID는 달라질 수 있지만 이름은 같음)
+        let windows = [
+            WindowInfo(id: 10, app: "Safari", title: "New Tab", pid: 999, frontmost: true),
+        ]
+        let allApps = IconCache.uniqueAppNames(from: windows)
+        let newApps = cache.filterNew(allApps)
+        XCTAssertTrue(newApps.isEmpty)  // 캐시에 이미 있으므로 새 앱 아님
+    }
+
+    func test_iconCache_setOverwrite_updatesValue() {
+        let cache = IconCache()
+        cache.set("Arc", iconData: "old_data")
+        cache.set("Arc", iconData: "new_data")
+
+        XCTAssertEqual(cache.get("Arc"), "new_data")
+        XCTAssertEqual(cache.count, 1)  // 덮어쓰기, 항목 수 변화 없음
+    }
 }
