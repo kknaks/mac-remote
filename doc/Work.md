@@ -35,7 +35,7 @@
 | Work-08 | I1: 프로젝트 셋업 (3탭) | | Done | 2026-05-24 | 2026-05-24 | Work-05 | — |
 | Work-09 | I2: WebSocket 클라이언트 | | Done | 2026-05-24 | 2026-05-24 | Work-08 | Spec-05 |
 | Work-10 | I3: 창 목록 화면 | | Done | 2026-05-24 | 2026-05-24 | Work-09 | Spec-01, Spec-02, Spec-04 |
-| Work-11 | I4: 매크로 화면 | | Backlog | | | Work-09 | Spec-03 |
+| Work-11 | I4: 매크로 화면 | | Done | 2026-05-24 | 2026-05-24 | Work-09 | Spec-03 |
 | Work-12 | I5: 설정 화면 | | Done | 2026-05-24 | 2026-05-24 | Work-09 | Spec-06, Spec-07 |
 | Work-13 | I6: 상태 처리 | | Backlog | | | Work-09 | Spec-05 |
 
@@ -96,3 +96,4 @@ Work-01 (CLI) ──► Work-02 (창 활성화)
 | 2026-05-24 | Work-07 완료 (Done) |
 | 2026-05-24 | Work-10 완료 (Done) |
 | 2026-05-24 | Work-12 완료 (Done) |
+| 2026-05-24 | Work-11 완료 (Done) |
