@@ -34,10 +34,21 @@ struct MacHelperApp: App {
                 lifecycle.start()
             }
         } label: {
-            // 메뉴바 아이콘 (SF Symbol) — 상태에 따라 변경
-            Image(systemName: lifecycle.appState.menuBarIconName)
+            // 메뉴바 아이콘 — 커스텀 PNG (template 모드)
+            menuBarIconImage
         }
         .menuBarExtraStyle(.window)
+    }
+
+    /// 번들 내 MenuBarIcon PNG를 template image로 로드
+    /// 실패 시 SF Symbol로 폴백
+    private var menuBarIconImage: some View {
+        if let url = Bundle.module.url(forResource: "MenuBarIcon", withExtension: "png"),
+           let nsImage = NSImage(contentsOf: url) {
+            nsImage.isTemplate = true
+            return AnyView(Image(nsImage: nsImage))
+        }
+        return AnyView(Image(systemName: lifecycle.appState.menuBarIconName))
     }
 }
 #else

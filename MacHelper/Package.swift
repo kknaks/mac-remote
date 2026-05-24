@@ -26,7 +26,10 @@ let package = Package(
             name: "MacHelperApp",
             dependencies: ["MacHelperLib"],
             path: "Sources/MacHelperApp",
-            exclude: ["Info.plist"]
+            exclude: ["Info.plist"],
+            resources: [.copy("Resources/MenuBarIcon.png"),
+                        .copy("Resources/MenuBarIcon@2x.png"),
+                        .copy("Resources/MenuBarIcon@3x.png")]
         ),
         .testTarget(
             name: "MacHelperTests",
