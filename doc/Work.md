@@ -1,0 +1,87 @@
+# Work Index
+
+> 모든 워크플랜의 인덱스. 스펙 커버리지와 작업 현황을 한눈에 파악한다.
+
+## 스펙 커버리지
+
+| Spec | 관련 Work | 커버리지 | 비고 |
+|------|-----------|----------|------|
+| Spec-01 | Work-01 | Partial | §3 계약은 Work-05에서 |
+| Spec-02 | Work-02 | Partial | §3 계약은 Work-05에서 |
+| Spec-03 | Work-03 | Partial | §3 계약은 Work-05에서 |
+| Spec-04 | Work-04 | Partial | §3 계약은 Work-05에서 |
+| Spec-05 | Work-05, Work-09 | Full | 서버(05)+클라이언트(09) |
+| Spec-06 | Work-01, Work-06 | Full | 확인(01)+메뉴바 안내(06) |
+| Spec-07 | Work-07, Work-12 | Full | QR생성(07)+QR스캔(12) |
+
+## 워크 현황
+
+### Mac 헬퍼 (M1~M7)
+
+| ID | 제목 | 담당 | 상태 | 시작일 | 완료일 | 의존 | Spec |
+|----|------|------|------|--------|--------|------|------|
+| Work-01 | M1: CLI 프로토타입 (창 목록) | | Backlog | | | — | Spec-01, Spec-06 |
+| Work-02 | M2: 창 활성화 | | Backlog | | | Work-01 | Spec-02 |
+| Work-03 | M3: 키 입력 | | Backlog | | | Work-01 | Spec-03 |
+| Work-04 | M4: 앱 아이콘 추출 | | Backlog | | | Work-01 | Spec-04 |
+| Work-05 | M5: WebSocket 서버 | | Backlog | | | Work-01, Work-02, Work-03, Work-04 | Spec-05 |
+| Work-06 | M6: 메뉴바 앱화 | | Backlog | | | Work-05 | Spec-06 |
+| Work-07 | M7: 페어링 QR | | Backlog | | | Work-06 | Spec-07 |
+
+### iOS 앱 (I1~I6)
+
+| ID | 제목 | 담당 | 상태 | 시작일 | 완료일 | 의존 | Spec |
+|----|------|------|------|--------|--------|------|------|
+| Work-08 | I1: 프로젝트 셋업 (3탭) | | Backlog | | | Work-05 | — |
+| Work-09 | I2: WebSocket 클라이언트 | | Backlog | | | Work-08 | Spec-05 |
+| Work-10 | I3: 창 목록 화면 | | Backlog | | | Work-09 | Spec-01, Spec-02, Spec-04 |
+| Work-11 | I4: 매크로 화면 | | Backlog | | | Work-09 | Spec-03 |
+| Work-12 | I5: 설정 화면 | | Backlog | | | Work-09 | Spec-06, Spec-07 |
+| Work-13 | I6: 상태 처리 | | Backlog | | | Work-09 | Spec-05 |
+
+### 통합 (T1~T3)
+
+| ID | 제목 | 담당 | 상태 | 시작일 | 완료일 | 의존 | Spec |
+|----|------|------|------|--------|--------|------|------|
+| Work-14 | T1: 엔드투엔드 테스트 | | Backlog | | | Work-07, Work-13 | 전체 |
+| Work-15 | T2: 엣지 케이스 대응 | | Backlog | | | Work-14 | 전체 |
+| Work-16 | T3: 다듬기 | | Backlog | | | Work-15 | 전체 |
+
+### 의존 관계 다이어그램
+
+```
+Work-01 (CLI) ──► Work-02 (창 활성화)
+    │          └► Work-03 (키 입력)
+    │          └► Work-04 (앱 아이콘)
+    │                │
+    └────────────────┴──► Work-05 (WS 서버) ──► Work-06 (메뉴바) ──► Work-07 (QR)
+                              │
+                              ▼
+                         Work-08 (iOS 셋업) ──► Work-09 (WS 클라이언트)
+                                                     │
+                                    ┌────────────────┼────────────────┐
+                                    ▼                ▼                ▼
+                              Work-10 (창목록)  Work-11 (매크로)  Work-12 (설정)
+                                    │                │                │
+                                    ▼                ▼                ▼
+                              Work-13 (상태 처리) ◄──┴────────────────┘
+                                    │
+                                    ▼
+                              Work-14 (E2E) ──► Work-15 (엣지) ──► Work-16 (다듬기)
+```
+
+## 상태 정의
+
+| 상태 | 의미 |
+|------|------|
+| Backlog | 대기 |
+| In Progress | 진행 중 |
+| Review | 리뷰 대기 |
+| Done | 완료 |
+| Blocked | 차단됨 (사유 비고에 기록) |
+
+## 변경 이력
+
+| 날짜 | 변경 내용 |
+|------|-----------|
+| 2026-05-24 | 최초 작성 — 16개 워크 등록 |
