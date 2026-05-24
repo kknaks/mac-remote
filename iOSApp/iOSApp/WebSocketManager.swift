@@ -79,6 +79,32 @@ final class WebSocketManager: ObservableObject {
     /// 수동 해제 플래그 (수동 해제 시 재연결 방지)
     private var isManualDisconnect: Bool = false
 
+    // MARK: - Computed Properties (SwiftUI 바인딩 편의)
+
+    /// 연결됨 여부
+    var isConnected: Bool {
+        connectionState == .connected
+    }
+
+    /// 연결 시도 중 여부 (connecting 또는 reconnecting)
+    var isConnecting: Bool {
+        connectionState == .connecting || connectionState == .reconnecting
+    }
+
+    /// 연결 상태 설명 문자열 (UI 표시용)
+    var connectionStatusText: String {
+        switch connectionState {
+        case .disconnected:
+            return "연결 안 됨"
+        case .connecting:
+            return "연결 중..."
+        case .connected:
+            return "연결됨"
+        case .reconnecting:
+            return "재연결 중 (\(reconnectAttempts)/\(wsMaxReconnectAttempts))"
+        }
+    }
+
     // MARK: - Init
 
     init(session: URLSession = .shared) {
