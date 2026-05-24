@@ -325,3 +325,89 @@ final class KeyAckResponseTests: XCTestCase {
         XCTAssertEqual(original, decoded)
     }
 }
+
+// MARK: - Work-17: Hold 모드 (Spec-03 §3-3, §4-2)
+
+#if canImport(CoreGraphics)
+final class HeldModifierStoreTests: XCTestCase {
+
+    func test_held_initiallyEmpty() {
+        let store = HeldModifierStore()
+        XCTAssertTrue(store.current.isEmpty)
+    }
+
+    func test_hold_addsToHeldSet() {
+        let store = HeldModifierStore()
+        let added = store.hold([.cmd])
+        XCTAssertEqual(store.current, [.cmd])
+        XCTAssertEqual(added, [.cmd])
+    }
+
+    func test_hold_idempotent_returnsOnlyNewlyAdded() {
+        let store = HeldModifierStore()
+        _ = store.hold([.cmd])
+        let added = store.hold([.cmd, .shift])
+        XCTAssertEqual(store.current, [.cmd, .shift])
+        XCTAssertEqual(added, [.shift]) // cmd was already held
+    }
+
+    func test_releaseAll_clearsAndReturnsPriorSet() {
+        let store = HeldModifierStore()
+        _ = store.hold([.cmd, .shift])
+        let released = store.releaseAll()
+        XCTAssertTrue(store.current.isEmpty)
+        XCTAssertEqual(released, [.cmd, .shift])
+    }
+
+    func test_releaseAll_whenEmpty_returnsEmpty() {
+        let store = HeldModifierStore()
+        let released = store.releaseAll()
+        XCTAssertTrue(released.isEmpty)
+    }
+}
+
+final class CombinedFlagsTests: XCTestCase {
+
+    func test_combinedFlags_requestOnly() {
+        let flags = combinedEventFlags(requested: [.cmd], held: [])
+        XCTAssertTrue(flags.contains(.maskCommand))
+        XCTAssertFalse(flags.contains(.maskShift))
+    }
+
+    func test_combinedFlags_heldOnly() {
+        let flags = combinedEventFlags(requested: [], held: [.cmd])
+        XCTAssertTrue(flags.contains(.maskCommand))
+    }
+
+    func test_combinedFlags_union() {
+        let flags = combinedEventFlags(requested: [.shift], held: [.cmd])
+        XCTAssertTrue(flags.contains(.maskCommand))
+        XCTAssertTrue(flags.contains(.maskShift))
+    }
+
+    func test_combinedFlags_dedupes() {
+        // 같은 modifier가 양쪽에 있어도 단일 비트만 set
+        let flags = combinedEventFlags(requested: [.cmd], held: [.cmd])
+        XCTAssertTrue(flags.contains(.maskCommand))
+    }
+}
+
+final class ModifierVirtualKeyCodeTests: XCTestCase {
+
+    func test_modifier_virtualKeyCode_cmd() {
+        XCTAssertEqual(Modifier.cmd.virtualKeyCode, 55)
+    }
+
+    func test_modifier_virtualKeyCode_shift() {
+        XCTAssertEqual(Modifier.shift.virtualKeyCode, 56)
+    }
+
+    func test_modifier_virtualKeyCode_alt() {
+        XCTAssertEqual(Modifier.alt.virtualKeyCode, 58)
+    }
+
+    func test_modifier_virtualKeyCode_ctrl() {
+        XCTAssertEqual(Modifier.ctrl.virtualKeyCode, 59)
+    }
+}
+#endif

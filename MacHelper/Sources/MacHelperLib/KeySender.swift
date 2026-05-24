@@ -184,6 +184,17 @@ extension Modifier {
         case .ctrl:  return .maskControl
         }
     }
+
+    /// Modifier → macOS 가상 키코드 (Work-17: hold/release용)
+    /// Left 키 기준 (cmd=55, shift=56, alt/option=58, ctrl=59)
+    public var virtualKeyCode: UInt16 {
+        switch self {
+        case .cmd:   return 55
+        case .shift: return 56
+        case .alt:   return 58
+        case .ctrl:  return 59
+        }
+    }
 }
 
 /// 유효한 Modifier 배열을 CGEventFlags로 합산
@@ -194,17 +205,74 @@ public func combinedEventFlags(from modifiers: [Modifier]) -> CGEventFlags {
     }
     return flags
 }
+
+/// 요청 modifier ∪ held modifier를 CGEventFlags로 합산 (Spec-03 §4-1 flags 합성)
+public func combinedEventFlags(requested: [Modifier], held: Set<Modifier>) -> CGEventFlags {
+    var flags = CGEventFlags()
+    for modifier in requested {
+        flags.insert(modifier.eventFlag)
+    }
+    for modifier in held {
+        flags.insert(modifier.eventFlag)
+    }
+    return flags
+}
+
+// MARK: - HeldModifierStore (Spec-03 §4-2)
+
+/// 현재 hold 중인 modifier 상태 저장 (스레드 안전)
+/// KeySender가 공유 인스턴스 1개를 유지한다.
+public final class HeldModifierStore {
+
+    private var heldSet: Set<Modifier> = []
+    private let lock = NSLock()
+
+    public init() {}
+
+    /// 현재 held set 스냅샷
+    public var current: Set<Modifier> {
+        lock.lock(); defer { lock.unlock() }
+        return heldSet
+    }
+
+    /// 요청 modifier들을 hold 상태로 추가. 신규 추가된 것만 반환.
+    /// - Parameter mods: hold할 modifier 목록
+    /// - Returns: 이번에 새로 추가된 modifier 집합 (이미 held인 건 제외)
+    @discardableResult
+    public func hold(_ mods: [Modifier]) -> Set<Modifier> {
+        lock.lock(); defer { lock.unlock() }
+        let newOnes = Set(mods).subtracting(heldSet)
+        heldSet.formUnion(newOnes)
+        return newOnes
+    }
+
+    /// 전체 release. 이전 held set을 반환 (keyUp 발행용).
+    @discardableResult
+    public func releaseAll() -> Set<Modifier> {
+        lock.lock(); defer { lock.unlock() }
+        let prior = heldSet
+        heldSet.removeAll()
+        return prior
+    }
+}
 #endif
 
 // MARK: - KeySender (Task 3, 4)
 
 #if canImport(CoreGraphics)
 import CoreGraphics
+#if canImport(AppKit)
+import AppKit
+#endif
 
 public enum KeySender {
 
-    /// 키 입력 전송 (Spec-03 §4 상태 전이)
+    /// 공유 held modifier 저장소 (Work-17, Spec-03 §4-2)
+    public static let heldStore = HeldModifierStore()
+
+    /// 키 입력 전송 (Spec-03 §4-1 상태 전이)
     /// 키코드 조회 → 이벤트 생성 → keyDown → keyUp
+    /// hold 중인 modifier가 있으면 flags에 OR로 합성된다 (Spec-03 §3-3, §4-2).
     ///
     /// - Parameter command: KeyCommand (key + modifiers)
     /// - Returns: Result<Void, KeySendError>
@@ -221,13 +289,15 @@ public enum KeySender {
             return .failure(.accessibilityPermissionDenied)
         }
 
-        // 3. modifier flags 계산
+        // 3. modifier flags 계산 (요청 ∪ held)
         // Spec-03 §5: INVALID_MODIFIER → 해당 modifier 무시
         let validMods = command.validModifiers
-        let flags = combinedEventFlags(from: validMods)
+        let held = heldStore.current
+        let flags = combinedEventFlags(requested: validMods, held: held)
 
         let modDesc = validMods.map { $0.rawValue }.joined(separator: "+")
-        print("[INFO] Sending key=\(command.key) modifiers=\(modDesc)")
+        let heldDesc = held.map { $0.rawValue }.joined(separator: "+")
+        print("[INFO] Sending key=\(command.key) modifiers=\(modDesc) held=[\(heldDesc)]")
 
         // 4. CGEvent 생성 - keyDown
         guard let keyDownEvent = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: true) else {
@@ -242,7 +312,7 @@ public enum KeySender {
         }
 
         // 6. modifier flags 설정
-        if !validMods.isEmpty {
+        if !flags.isEmpty {
             keyDownEvent.flags = flags
             keyUpEvent.flags = flags
         }
@@ -251,6 +321,65 @@ public enum KeySender {
         keyDownEvent.post(tap: .cghidEventTap)
         keyUpEvent.post(tap: .cghidEventTap)
 
+        return .success(())
+    }
+
+    // MARK: - Hold 모드 (Work-17, Spec-03 §3-3, §4-2)
+
+    /// 지정 modifier들을 hold 상태로 만든다.
+    /// 신규 modifier에 대해서만 modifier 가상키 keyDown을 발행한다.
+    /// 이미 held인 modifier는 무시 (멱등).
+    public static func holdModifiers(_ mods: [Modifier]) -> Result<Void, KeySendError> {
+        // Accessibility 권한 확인
+        if !AXIsProcessTrusted() {
+            print("[ERROR] Accessibility permission denied")
+            return .failure(.accessibilityPermissionDenied)
+        }
+
+        let newlyHeld = heldStore.hold(mods)
+        let held = heldStore.current
+        let flags = combinedEventFlags(requested: [], held: held)
+
+        for modifier in newlyHeld {
+            guard let event = CGEvent(keyboardEventSource: nil, virtualKey: modifier.virtualKeyCode, keyDown: true) else {
+                print("[ERROR] CGEvent creation failed for hold \(modifier.rawValue)")
+                return .failure(.eventCreationFailed)
+            }
+            event.flags = flags
+            event.post(tap: .cghidEventTap)
+        }
+
+        let heldDesc = held.map { $0.rawValue }.joined(separator: "+")
+        print("[INFO] Held modifiers: [\(heldDesc)]")
+        return .success(())
+    }
+
+    /// 유지 중인 모든 modifier를 release한다.
+    /// 각 modifier에 대해 keyUp 이벤트를 발행한다.
+    /// 비어있어도 성공 (멱등, Spec-03 §9 #7).
+    @discardableResult
+    public static func releaseModifiers() -> Result<Void, KeySendError> {
+        let prior = heldStore.releaseAll()
+        if prior.isEmpty {
+            return .success(())
+        }
+
+        if !AXIsProcessTrusted() {
+            // 상태는 이미 비웠으므로 ack는 성공 처리
+            print("[WARN] Accessibility permission denied during release — held set cleared without keyUp")
+            return .success(())
+        }
+
+        // keyUp 이벤트 발행 (flags는 비어있는 상태 — 이게 떼졌다는 신호)
+        for modifier in prior {
+            guard let event = CGEvent(keyboardEventSource: nil, virtualKey: modifier.virtualKeyCode, keyDown: false) else {
+                print("[ERROR] CGEvent creation failed for release \(modifier.rawValue)")
+                continue
+            }
+            event.post(tap: .cghidEventTap)
+        }
+
+        print("[INFO] Released all held modifiers")
         return .success(())
     }
 }
