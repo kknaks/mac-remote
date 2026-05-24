@@ -160,13 +160,14 @@ final class MessageHandlerTests: XCTestCase {
         XCTAssertNotNil(windows)
     }
 
-    // MARK: focus routing
+    // MARK: focus routing (Task 5: Work-02 connection)
 
     func test_handle_focus_missingWindowId_returnsError() {
         let response = handler.handle(#"{"action":"focus"}"#)
         let json = parseJSON(response)
 
         XCTAssertEqual(json["type"] as? String, "ack")
+        XCTAssertEqual(json["action"] as? String, "focus")
         XCTAssertEqual(json["ok"] as? Bool, false)
         XCTAssertEqual(json["error"] as? String, "missing windowId")
     }
@@ -195,6 +196,26 @@ final class MessageHandlerTests: XCTestCase {
 
         XCTAssertEqual(json["type"] as? String, "ack")
         XCTAssertEqual(json["action"] as? String, "focus")
+        XCTAssertEqual(json["ok"] as? Bool, true)
+    }
+
+    func test_handleFocus_direct_missingWindowId() {
+        let msg = ClientMessage(action: "focus", windowId: nil)
+        let response = handler.handleFocus(message: msg)
+        let json = parseJSON(response)
+
+        XCTAssertEqual(json["type"] as? String, "ack")
+        XCTAssertEqual(json["ok"] as? Bool, false)
+        XCTAssertEqual(json["error"] as? String, "missing windowId")
+    }
+
+    func test_handleFocus_direct_negativeWindowId() {
+        let msg = ClientMessage(action: "focus", windowId: -5)
+        let response = handler.handleFocus(message: msg)
+        let json = parseJSON(response)
+
+        XCTAssertEqual(json["ok"] as? Bool, false)
+        XCTAssertEqual(json["error"] as? String, "invalid windowId")
     }
 
     // MARK: key routing
