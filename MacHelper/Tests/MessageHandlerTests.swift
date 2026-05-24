@@ -218,13 +218,14 @@ final class MessageHandlerTests: XCTestCase {
         XCTAssertEqual(json["error"] as? String, "invalid windowId")
     }
 
-    // MARK: key routing
+    // MARK: key routing (Task 6: Work-03 connection)
 
     func test_handle_key_missingKey_returnsError() {
         let response = handler.handle(#"{"action":"key"}"#)
         let json = parseJSON(response)
 
         XCTAssertEqual(json["type"] as? String, "ack")
+        XCTAssertEqual(json["action"] as? String, "key")
         XCTAssertEqual(json["ok"] as? Bool, false)
         XCTAssertEqual(json["error"] as? String, "missing key")
     }
@@ -234,6 +235,7 @@ final class MessageHandlerTests: XCTestCase {
         let json = parseJSON(response)
 
         XCTAssertEqual(json["type"] as? String, "ack")
+        XCTAssertEqual(json["action"] as? String, "key")
         XCTAssertEqual(json["ok"] as? Bool, false)
         XCTAssertTrue((json["error"] as? String)?.contains("unknown key") ?? false)
     }
@@ -254,6 +256,45 @@ final class MessageHandlerTests: XCTestCase {
         XCTAssertEqual(json["type"] as? String, "ack")
         XCTAssertEqual(json["action"] as? String, "key")
         XCTAssertEqual(json["ok"] as? Bool, true)
+    }
+
+    func test_handleKey_direct_missingKey() {
+        let msg = ClientMessage(action: "key", key: nil)
+        let response = handler.handleKey(message: msg)
+        let json = parseJSON(response)
+
+        XCTAssertEqual(json["type"] as? String, "ack")
+        XCTAssertEqual(json["ok"] as? Bool, false)
+        XCTAssertEqual(json["error"] as? String, "missing key")
+    }
+
+    func test_handleKey_direct_unknownKey() {
+        let msg = ClientMessage(action: "key", key: "nonexistent")
+        let response = handler.handleKey(message: msg)
+        let json = parseJSON(response)
+
+        XCTAssertEqual(json["ok"] as? Bool, false)
+        XCTAssertTrue((json["error"] as? String)?.contains("unknown key") ?? false)
+    }
+
+    func test_handleKey_direct_multipleModifiers() {
+        let msg = ClientMessage(action: "key", key: "4", modifiers: ["cmd", "shift"])
+        let response = handler.handleKey(message: msg)
+        let json = parseJSON(response)
+
+        XCTAssertEqual(json["type"] as? String, "ack")
+        XCTAssertEqual(json["action"] as? String, "key")
+        XCTAssertEqual(json["ok"] as? Bool, true)
+    }
+
+    func test_handle_key_allValidKeys_returnOk() {
+        // 대표적인 키들만 테스트
+        let keys = ["a", "z", "0", "9", "tab", "space", "return", "escape", "f1", "up"]
+        for key in keys {
+            let response = handler.handle(#"{"action":"key","key":"\#(key)"}"#)
+            let json = parseJSON(response)
+            XCTAssertEqual(json["ok"] as? Bool, true, "key '\(key)' should return ok:true")
+        }
     }
 
     // MARK: getPermissions routing
