@@ -1,12 +1,12 @@
 import SwiftUI
 
-/// 매크로 탭 — 2열 그리드 매크로 버튼 화면 (Spec-03 §8, Work-11 Task 3)
+/// 매크로 탭 — 2열 그리드 매크로 버튼 화면 (Spec-03 §8, Work-11)
 /// 기본 프리셋 + 사용자 정의 매크로를 LazyVGrid로 표시
 struct MacroView: View {
     @EnvironmentObject var wsManager: WebSocketManager
 
-    /// 사용자 정의 매크로 목록 (UserDefaults에서 로드, Work-11 Task 6)
-    @State private var userMacros: [MacroItem] = []
+    /// 사용자 매크로 저장소 (Work-11 Task 6)
+    @StateObject private var macroStore = MacroStore()
 
     /// 매크로 추가 시트 표시 여부
     @State private var showAddSheet = false
@@ -19,11 +19,6 @@ struct MacroView: View {
         GridItem(.flexible(), spacing: 12),
         GridItem(.flexible(), spacing: 12)
     ]
-
-    /// 전체 매크로 목록 (프리셋 + 사용자 정의)
-    private var allMacros: [MacroItem] {
-        MacroItem.defaults + userMacros
-    }
 
     var body: some View {
         NavigationStack {
@@ -41,11 +36,11 @@ struct MacroView: View {
                     }
 
                     // MARK: - 사용자 정의 매크로 섹션
-                    if !userMacros.isEmpty {
+                    if !macroStore.userMacros.isEmpty {
                         sectionHeader("사용자 매크로")
 
                         LazyVGrid(columns: columns, spacing: 12) {
-                            ForEach(userMacros) { macro in
+                            ForEach(macroStore.userMacros) { macro in
                                 MacroButtonView(macro: macro) {
                                     executeMacro(macro)
                                 }
@@ -57,7 +52,7 @@ struct MacroView: View {
                                         Label("편집", systemImage: "pencil")
                                     }
                                     Button(role: .destructive) {
-                                        deleteMacro(macro)
+                                        macroStore.delete(macro)
                                     } label: {
                                         Label("삭제", systemImage: "trash")
                                     }
@@ -86,16 +81,13 @@ struct MacroView: View {
                 AddMacroSheet(
                     editingMacro: editingMacro,
                     onSave: { macro in
-                        saveMacro(macro)
+                        macroStore.saveOrUpdate(macro, editingId: editingMacro?.id)
                         showAddSheet = false
                     },
                     onCancel: {
                         showAddSheet = false
                     }
                 )
-            }
-            .onAppear {
-                loadUserMacros()
             }
         }
     }
@@ -122,49 +114,6 @@ struct MacroView: View {
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.impactOccurred()
         #endif
-    }
-
-    // MARK: - UserDefaults CRUD (Work-11 Task 6)
-
-    /// 사용자 매크로 로드
-    private func loadUserMacros() {
-        guard let data = UserDefaults.standard.data(forKey: MacroItem.userDefaultsKey) else {
-            return
-        }
-        do {
-            userMacros = try JSONDecoder().decode([MacroItem].self, from: data)
-        } catch {
-            print("[ERROR] Failed to load user macros: \(error.localizedDescription)")
-        }
-    }
-
-    /// 사용자 매크로 저장/업데이트
-    private func saveMacro(_ macro: MacroItem) {
-        if let editingMacro = editingMacro,
-           let index = userMacros.firstIndex(where: { $0.id == editingMacro.id }) {
-            // 편집: 기존 매크로 교체
-            userMacros[index] = macro
-        } else {
-            // 추가: 새 매크로 추가
-            userMacros.append(macro)
-        }
-        persistUserMacros()
-    }
-
-    /// 사용자 매크로 삭제
-    private func deleteMacro(_ macro: MacroItem) {
-        userMacros.removeAll { $0.id == macro.id }
-        persistUserMacros()
-    }
-
-    /// UserDefaults에 사용자 매크로 JSON 저장
-    private func persistUserMacros() {
-        do {
-            let data = try JSONEncoder().encode(userMacros)
-            UserDefaults.standard.set(data, forKey: MacroItem.userDefaultsKey)
-        } catch {
-            print("[ERROR] Failed to persist user macros: \(error.localizedDescription)")
-        }
     }
 }
 
