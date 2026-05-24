@@ -41,6 +41,9 @@ public final class WebSocketServer {
     /// 메시지 핸들러 (외부 주입 가능)
     public var messageHandler: MessageHandler
 
+    /// 앱 아이콘 캐시 (Spec-04: 새 앱 감지 시 push)
+    public let iconCache = IconCache()
+
     public init(port: UInt16 = defaultPort) {
         self.port = port
         self.messageHandler = MessageHandler()
@@ -150,6 +153,7 @@ public final class WebSocketServer {
     }
 
     /// 모든 연결된 클라이언트에 windowList push
+    /// 새 앱이 감지되면 appIcons도 push한다 (Spec-04, Spec-05 §7 Step 4)
     public func pushWindowList() {
         let windowListJSON = messageHandler.handleListWindows()
 
@@ -163,6 +167,28 @@ public final class WebSocketServer {
         for client in currentClients {
             client.session.writeText(windowListJSON)
         }
+
+        // 새 앱 감지 및 아이콘 push (Spec-04 §4)
+        pushNewAppIcons()
+    }
+
+    /// 새 앱이 감지되면 appIcons를 모든 클라이언트에 push (Spec-05 §3-1 appIcons)
+    public func pushNewAppIcons() {
+        #if canImport(AppKit)
+        let windows = WindowManager.listWindows()
+        let newApps = IconExtractor.extractIcons(from: windows, cache: iconCache)
+
+        guard !newApps.isEmpty else { return }
+
+        let iconsResponse = iconCache.toResponse(for: newApps)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        guard let data = try? encoder.encode(iconsResponse),
+              let json = String(data: data, encoding: .utf8) else { return }
+
+        print("[INFO] Pushing appIcons for new apps: \(newApps)")
+        broadcast(json)
+        #endif
     }
 
     /// 특정 메시지를 모든 클라이언트에 broadcast
