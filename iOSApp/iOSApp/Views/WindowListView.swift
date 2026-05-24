@@ -32,6 +32,9 @@ struct WindowListView: View {
             // 미연결 오버레이 (Work-13 Task 4)
             .disconnectedOverlay()
             .navigationTitle("창 목록")
+            .onAppear {
+                updateIconCache(from: wsManager.appIcons)
+            }
             .onChange(of: wsManager.appIcons) { _, newIcons in
                 updateIconCache(from: newIcons)
             }
@@ -42,21 +45,18 @@ struct WindowListView: View {
 
     private var windowListContent: some View {
         ScrollView {
-            LazyVStack(spacing: 8) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 80), spacing: 16)], spacing: 16) {
                 ForEach(wsManager.windows) { window in
-                    WindowCardView(
-                        window: window,
-                        appIcon: iconCache[window.app]
-                    )
-                    .onTapGesture {
-                        // Spec-02 §8: 카드 탭 → focus 전송 + 햅틱
-                        haptic.impactOccurred()
-                        wsManager.sendFocus(windowId: window.id)
-                    }
+                    appGridCell(window: window)
+                        .onTapGesture {
+                            // Spec-02 §8: 카드 탭 → focus 전송 + 햅틱
+                            haptic.impactOccurred()
+                            wsManager.sendFocus(windowId: window.id)
+                        }
                 }
             }
             .padding(.horizontal)
-            .padding(.top, 8)
+            .padding(.top, 12)
         }
         .refreshable {
             // Spec-01 §8: 당겨서 새로고침
@@ -64,6 +64,40 @@ struct WindowListView: View {
             // 잠시 대기하여 UI 피드백 제공
             try? await Task.sleep(nanoseconds: 300_000_000)
         }
+    }
+
+    /// 앱 아이콘 그리드 셀 (아이콘 + 앱 이름)
+    private func appGridCell(window: WindowInfo) -> some View {
+        VStack(spacing: 6) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.white.opacity(0.06))
+                    .frame(width: 64, height: 64)
+
+                if let icon = iconCache[window.app] {
+                    Image(uiImage: icon)
+                        .resizable()
+                        .interpolation(.high)
+                        .scaledToFit()
+                        .frame(width: 52, height: 52)
+                } else {
+                    Image(systemName: "app.dashed")
+                        .font(.system(size: 28))
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(window.frontmost ? Color.accent : Color.clear, lineWidth: 2)
+            )
+
+            Text(window.app)
+                .font(.caption2)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .foregroundStyle(.primary)
+        }
+        .frame(width: 80)
     }
 
     // MARK: - Empty State (Spec-01 §9 #1)

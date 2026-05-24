@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import SwiftUI
 
 /// 사용자 매크로 저장소 (UserDefaults 기반, Work-11 Task 6)
 /// - 기본 프리셋은 MacroItem.defaults에서 제공 (읽기 전용)

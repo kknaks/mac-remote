@@ -38,7 +38,7 @@ public struct RawWindowEntry: Equatable {
 /// - ownerName이 비어있지 않을 것
 /// - excludedProcesses에 포함되지 않을 것
 public func filterWindows(_ entries: [RawWindowEntry]) -> [RawWindowEntry] {
-    return entries.filter { entry in
+    let base = entries.filter { entry in
         // layer == 0: 일반 창만 (Spec-01 §6)
         guard entry.windowLayer == 0 else { return false }
         // 빈 OwnerName 제외 (Spec-01 §6)
@@ -47,6 +47,20 @@ public func filterWindows(_ entries: [RawWindowEntry]) -> [RawWindowEntry] {
         guard !excludedProcesses.contains(entry.ownerName) else { return false }
         return true
     }
+
+    // 앱(PID)별 1개씩만 — 제목 있는 항목 우선, 입력 순서 보존
+    var seen = Set<Int>()
+    var result: [RawWindowEntry] = []
+    let preferred = base.filter { !($0.windowName ?? "").isEmpty }
+    for entry in preferred where !seen.contains(entry.ownerPID) {
+        seen.insert(entry.ownerPID)
+        result.append(entry)
+    }
+    for entry in base where !seen.contains(entry.ownerPID) {
+        seen.insert(entry.ownerPID)
+        result.append(entry)
+    }
+    return result
 }
 
 /// 필터링된 RawWindowEntry → WindowInfo 변환
@@ -108,7 +122,7 @@ public enum WindowManager {
     public static func listWindows(frontmostPID: Int?) -> [WindowInfo] {
         // CGWindowListCopyWindowInfo 호출
         guard let windowList = CGWindowListCopyWindowInfo(
-            [.optionOnScreenOnly, .excludeDesktopElements],
+            [.optionAll, .excludeDesktopElements],
             kCGNullWindowID
         ) as? [[String: Any]] else {
             // Spec-01 §5 NULL_LIST: CGWindowListCopyWindowInfo null 반환
@@ -136,8 +150,16 @@ public enum WindowManager {
             )
         }
 
+        // 일반 앱(.regular)만 — 백그라운드 데몬/UIElement 제외
+        let regularPIDs = Set(
+            NSWorkspace.shared.runningApplications
+                .filter { $0.activationPolicy == .regular }
+                .map { Int($0.processIdentifier) }
+        )
+        let regularOnly = rawEntries.filter { regularPIDs.contains($0.ownerPID) }
+
         // 필터링
-        let filtered = filterWindows(rawEntries)
+        let filtered = filterWindows(regularOnly)
         print("[INFO] Windows: total=\(totalCount), filtered=\(filtered.count)")
 
         // WindowInfo 변환

@@ -110,7 +110,7 @@ public enum WindowFocuser {
         }
 
         // 이미 active인 경우에도 activate 호출 (Spec-02 §9 #1: 아무 변화 없음, ack:true)
-        let activated = app.activate(options: [.activateIgnoringOtherApps])
+        let activated = app.activate()
         if activated {
             print("[INFO] App activated: pid=\(pid), wasActive=\(app.isActive)")
         } else {

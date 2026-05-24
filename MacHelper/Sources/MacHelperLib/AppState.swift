@@ -1,10 +1,16 @@
 import Foundation
+#if canImport(Observation)
+import Observation
+#endif
 
 // MARK: - AppState (Work-06: 메뉴바 앱 상태 모델)
 
 /// 메뉴바 앱의 전체 상태를 관리하는 모델
 /// MenuBarExtra에서 표시할 연결 상태, 포트, 권한 정보를 담는다.
 /// 순수 Swift — SwiftUI 없이 테스트 가능
+#if canImport(Observation)
+@Observable
+#endif
 public final class AppState {
 
     // MARK: - Connection State
