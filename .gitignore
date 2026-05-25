@@ -5,6 +5,9 @@
 .build/
 Package.resolved
 
+# Release build artifacts (build_dmg.sh output)
+/build/
+
 # Xcode
 xcuserdata/
 *.xcworkspace/xcuserdata/

@@ -12,9 +12,10 @@ sudo mkdir -p "$APP/Contents/Resources"
 sudo cp "$SRC_BIN" "$APP/Contents/MacOS/MacHelper"
 sudo cp "$SRC_PLIST" "$APP/Contents/Info.plist"
 sudo cp "$SRC_ICON" "$APP/Contents/Resources/AppIcon.icns"
-# SPM resources bundle (메뉴바 아이콘 PNG) — 실행 파일 옆에 둬야 Bundle.module이 찾음
+# SPM resources bundle (메뉴바 아이콘 PNG) — Contents/Resources/ 에 둬야
+# Bundle.module 의 검색 후보(Bundle.main.resourceURL)와 매칭됨
 if [ -d "$SRC_RES_BUNDLE" ]; then
-  sudo cp -R "$SRC_RES_BUNDLE" "$APP/Contents/MacOS/MacHelper_MacHelperApp.bundle"
+  sudo cp -R "$SRC_RES_BUNDLE" "$APP/Contents/Resources/MacHelper_MacHelperApp.bundle"
 fi
 sudo codesign --force --deep --sign - "$APP"
 echo "DONE: $APP"
