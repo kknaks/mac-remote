@@ -8,6 +8,9 @@ Package.resolved
 # Release build artifacts (build_dmg.sh output)
 /build/
 
+# Image processing backups (e.g. AppIcon 1024 alpha flatten)
+*.orig
+
 # Xcode
 xcuserdata/
 *.xcworkspace/xcuserdata/
