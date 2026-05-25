@@ -106,7 +106,33 @@ WebSocket을 `ws://` 평문으로 쓰지만, **사설 IP(192.168.x.x, 10.x, 172.
 
 > 만약 도메인 기반 호스트로 평문 통신을 한다면 `NSAllowsLocalNetworking = true` 같은 예외가 필요해진다. 우리 케이스는 해당 없음.
 
-### 2-4. 서명 설정 확인
+### 2-4. Export Compliance (`ITSAppUsesNonExemptEncryption`)
+
+이 키가 없으면 매 빌드 업로드 후 App Store Connect가 **"앱 암호화 문서"** 다이얼로그를 띄워 "암호화 알고리즘 유형"을 묻는다 (TestFlight 처리 후 ⚠️ Missing Compliance 표시).
+
+우리 앱은:
+- 자체 암호화 알고리즘 **없음** (독점/표준 모두 해당 없음)
+- HTTPS/TLS 같은 표준 암호화 통신 **없음** (WebSocket이 `ws://` 평문)
+- → `ITSAppUsesNonExemptEncryption = NO` 로 명시 → 다이얼로그 안 뜸
+
+`project.pbxproj`에 다음이 있어야 함 (Debug + Release):
+
+```
+INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+```
+
+확인:
+```bash
+grep -c ITSAppUsesNonExemptEncryption iOSApp/MacRemote.xcodeproj/project.pbxproj
+# 2  ← Debug + Release 양쪽
+```
+
+> ⚠️ 미래에 HTTPS·TLS·자체 암호화를 도입하면 이 키 값을 재검토해야 한다.
+> - 표준 암호화(HTTPS, OS 기본 TLS)만 사용 → 여전히 `NO` 가능 (대부분의 케이스에서 면제)
+> - 독점/비표준 암호화 도입 → `YES` + 미국 수출 규정 신고 (BIS) + `ITSEncryptionExportComplianceCode` 추가 필요
+> 정확한 분류는 [Apple Export Compliance 가이드](https://developer.apple.com/help/app-store-connect/reference/export-compliance-documentation/) 참조.
+
+### 2-5. 서명 설정 확인
 
 `MacRemote.xcodeproj/project.pbxproj`:
 
@@ -161,12 +187,11 @@ Organizer → Archives 탭 → 방금 만든 archive 선택 → **Distribute App
 
 ### 4-2. Export Compliance
 
-처리 끝나면 노란 ⚠️ **"Missing Compliance"** 표시되는 경우 클릭:
+`ITSAppUsesNonExemptEncryption = NO`가 Info.plist에 들어 있으면 이 단계는 **자동 통과** — 다이얼로그가 안 뜬다 (§2-4 참조).
 
-- 질문: "암호화를 사용합니까?"
-- 답: **아니요** *(이 앱은 평문 WebSocket만 사용, HTTPS/암호화 통신 없음)*
-
-> 표준 암호화(HTTPS, TLS만) 사용 시엔 "예 → 표준 암호화" 선택하면 면제. 우리 케이스는 그냥 "아니요"로 충분.
+**키가 없는 빌드**가 올라가서 ⚠️ **"Missing Compliance"** 가 뜨는 경우:
+- "암호화 알고리즘 유형은?" → **"위에 언급된 알고리즘에 모두 해당하지 않음"** 선택 → 저장
+- 이후 빌드부터는 §2-4를 적용해 다이얼로그 자체가 안 뜨게 한다.
 
 ### 4-3. 내부 테스터 추가
 
@@ -211,6 +236,7 @@ Distribute App 단계에서 **"Manage Version and Build Number"** 체크하면 X
 |---|---|
 | **`Validation failed: Invalid large app icon … can't be transparent or contain an alpha channel`** | 1024 아이콘 알파 채널 문제. §2-1로 평탄화. |
 | **`Validation failed: Missing Info.plist value … NSLocalNetworkUsageDescription`** | §2-2 권한 키 누락. project.pbxproj에 `INFOPLIST_KEY_NSLocalNetworkUsageDescription` 추가. |
+| TestFlight 처리 후 ⚠️ **"Missing Compliance"** 또는 매 빌드마다 "앱 암호화 문서" 다이얼로그 | §2-4 `ITSAppUsesNonExemptEncryption = NO` 키 누락. 추가하면 다음 빌드부터 안 뜸. 이번 빌드는 다이얼로그에서 "위에 언급된 알고리즘에 모두 해당하지 않음" 선택. |
 | iPhone 설치 후 Mac에 연결 안 됨 (조용히 실패) | 로컬 네트워크 권한 거부. 설정 → MacRemote → "로컬 네트워크" 허용. |
 | Archive 메뉴 회색 | Destination이 시뮬레이터. "Any iOS Device (arm64)"로 변경. |
 | `Provisioning profile doesn't include the currently selected device` | 다른 기기에 직접 설치하려는 경우. TestFlight 통해 배포할 거면 무시. Xcode 직접 설치하려면 device를 Apple Developer에 등록. |
