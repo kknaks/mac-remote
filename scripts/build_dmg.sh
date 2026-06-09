@@ -1,5 +1,5 @@
 #!/bin/bash
-# MacHelper Release DMG 빌드 스크립트
+# DeskDeckHelper Release DMG 빌드 스크립트 (출력물 이름 = DeskDeckHelper, SPM product는 MacHelperApp 유지)
 # - Universal Binary (arm64 + x86_64) Release 빌드
 # - .app 번들 조립
 # - Developer ID Application 인증서로 codesign
@@ -16,7 +16,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PKG="$ROOT/MacHelper"
 BUILD_DIR="$ROOT/build"
-APP_NAME="MacHelper"
+APP_NAME="DeskDeckHelper"   # 출력 .app/실행파일/DMG 이름 (브랜드). SPM product명(MacHelperApp)·리소스번들명과는 별개
 APP="$BUILD_DIR/$APP_NAME.app"
 SRC_PLIST="$PKG/Sources/MacHelperApp/Info.plist"
 SRC_ICON="$ROOT/icon/AppIcon.icns"

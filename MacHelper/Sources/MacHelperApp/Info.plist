@@ -5,9 +5,9 @@
     <!-- Work-06 Task 5: Dock 아이콘 숨김 -->
     <key>LSUIElement</key>
     <true/>
-    <!-- 실행파일 파일명은 MacHelper로 고정(build_dmg APP_NAME). 표시 이름만 DeskDeckHelper로 변경 -->
+    <!-- 실행파일 파일명 = build_dmg APP_NAME(DeskDeckHelper)과 일치시켜야 실행됨 -->
     <key>CFBundleExecutable</key>
-    <string>MacHelper</string>
+    <string>DeskDeckHelper</string>
     <key>CFBundleName</key>
     <string>DeskDeckHelper</string>
     <key>CFBundleDisplayName</key>
