@@ -123,6 +123,8 @@ public struct QRCodeView: View {
                 .textSelection(.enabled)
         }
         .onAppear {
+            // 팝오버 열 때마다 최신 IP를 재조회 (네트워크 전환 직후 stale 방지)
+            currentIP = NetworkInfo.primaryIPAddress()
             startIPMonitor()
         }
         .onDisappear {

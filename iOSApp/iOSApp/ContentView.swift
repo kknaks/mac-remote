@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// 3탭 TabView 메인 화면
 /// - 창 목록 (macwindow)
@@ -37,6 +38,22 @@ struct ContentView: View {
         .onChange(of: scenePhase) { _, newPhase in
             handleScenePhaseChange(newPhase)
         }
+        // 연결됨 동안 화면 자동 잠금 방지 (리모컨 사용 중 절전 차단)
+        .onChange(of: wsManager.connectionState) { _, _ in
+            updateIdleTimer()
+        }
+        .onAppear {
+            updateIdleTimer()
+        }
+    }
+
+    // MARK: - Idle Timer (화면 자동 잠금 제어)
+
+    /// WebSocket이 .connected일 때만 화면을 계속 켜둔다.
+    /// 그 외 상태(disconnected/connecting/reconnecting)에서는 iOS 기본 자동 잠금 따름.
+    private func updateIdleTimer() {
+        let shouldStayAwake = wsManager.connectionState == .connected
+        UIApplication.shared.isIdleTimerDisabled = shouldStayAwake
     }
 
     // MARK: - App Lifecycle (Spec-05 §9 #5)

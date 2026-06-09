@@ -11,6 +11,9 @@ Package.resolved
 # Image processing backups (e.g. AppIcon 1024 alpha flatten)
 *.orig
 
+# Obsidian editor state (machine-local)
+.obsidian/
+
 # Xcode
 xcuserdata/
 *.xcworkspace/xcuserdata/

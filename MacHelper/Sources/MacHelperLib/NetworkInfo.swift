@@ -10,11 +10,11 @@ import Network
 /// iOS 앱이 연결할 Mac의 IP:포트를 메뉴바에 표시하기 위해 사용
 public enum NetworkInfo {
 
-    /// 로컬 Wi-Fi IP 주소 목록 조회
+    /// 로컬 Wi-Fi IP 주소 목록 조회 (인터페이스 이름과 함께)
     /// getifaddrs로 네트워크 인터페이스 목록을 가져온다.
-    /// en0 (Wi-Fi) 우선, 없으면 다른 인터페이스도 포함
-    public static func localIPAddresses() -> [String] {
-        var addresses: [String] = []
+    /// link-local(169.254.x), loopback은 제외한다.
+    public static func localIPAddressesWithInterface() -> [(interface: String, address: String)] {
+        var addresses: [(interface: String, address: String)] = []
 
         #if canImport(Darwin)
         var ifaddr: UnsafeMutablePointer<ifaddrs>?
@@ -31,8 +31,8 @@ public enum NetworkInfo {
             // IPv4만 (AF_INET)
             if addrFamily == UInt8(AF_INET) {
                 let name = String(cString: interface.ifa_name)
-                // en0 = Wi-Fi, en1 = Ethernet (일반적)
-                if name.hasPrefix("en") {
+                // en0 = Wi-Fi, en1+ = Ethernet/Thunderbolt, bridgeN = 인터넷 공유
+                if name.hasPrefix("en") || name.hasPrefix("bridge") {
                     var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
                     if getnameinfo(
                         interface.ifa_addr,
@@ -42,7 +42,11 @@ public enum NetworkInfo {
                         nil, 0,
                         NI_NUMERICHOST
                     ) == 0 {
-                        addresses.append(String(cString: hostname))
+                        let address = String(cString: hostname)
+                        // link-local(169.254.x) 제외 — DHCP 실패 시 자동 부여되는 무효 주소
+                        if !address.hasPrefix("169.254.") {
+                            addresses.append((name, address))
+                        }
                     }
                 }
             }
@@ -55,9 +59,22 @@ public enum NetworkInfo {
         return addresses
     }
 
-    /// 대표 IP 주소 (첫 번째, 없으면 "localhost")
+    /// 로컬 Wi-Fi IP 주소 목록 (인터페이스 이름 없이 — 기존 API 호환)
+    public static func localIPAddresses() -> [String] {
+        return localIPAddressesWithInterface().map { $0.address }
+    }
+
+    /// 대표 IP 주소 — en0(Wi-Fi) 우선, 그다음 bridge(인터넷 공유), 그다음 다른 en*
+    /// 모두 없으면 "localhost"
     public static func primaryIPAddress() -> String {
-        return localIPAddresses().first ?? "localhost"
+        let all = localIPAddressesWithInterface()
+        if let wifi = all.first(where: { $0.interface == "en0" }) {
+            return wifi.address
+        }
+        if let shared = all.first(where: { $0.interface.hasPrefix("bridge") }) {
+            return shared.address
+        }
+        return all.first?.address ?? "localhost"
     }
 }
 

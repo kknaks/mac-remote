@@ -254,7 +254,8 @@ struct SettingsView: View {
         ipInput = info.host
         portInput = String(info.port)
 
-        wsManager.connect(host: info.host, port: info.port)
+        // 호스트가 바뀔 수 있으므로 기존 연결/재연결을 정리하고 새로 연결
+        wsManager.reconnect(host: info.host, port: info.port)
     }
 
     /// QR 스캔 결과 처리 (Spec-07 §4, §5)
@@ -270,9 +271,10 @@ struct SettingsView: View {
         ipInput = info.host
         portInput = String(info.port)
 
-        // 연결 정보 저장 + 연결 (Spec-07 §4)
+        // 연결 정보 저장 + 강제 재연결 (Spec-07 §4)
+        // 기존 옛 호스트로 재연결 중인 task/timer를 모두 정리한 뒤 새 호스트로 connect
         ConnectionInfoStore.save(info)
-        wsManager.connect(host: info.host, port: info.port)
+        wsManager.reconnect(host: info.host, port: info.port)
     }
 }
 

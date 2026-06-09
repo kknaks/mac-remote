@@ -109,6 +109,37 @@ public final class WebSocketServer {
         clientsLock.unlock()
 
         print("[INFO] Client connected: \(clientId)")
+
+        // 새 클라이언트에게 전체 아이콘 캐시 1회 전송 (Spec-04, Spec-05 §7 Step 4 보강)
+        // pushNewAppIcons()는 서버 캐시에 없는 새 앱만 보내므로, 재연결한 클라이언트는
+        // 자신의 in-memory 캐시가 비어있어도 아이콘을 받지 못함 → 초기 동기화가 필요.
+        sendFullIconSnapshot(to: session)
+    }
+
+    /// 특정 세션에게 현재까지 캐시된 전체 아이콘을 전송 (재연결/신규 클라이언트 초기 동기화)
+    private func sendFullIconSnapshot(to session: WebSocketSession) {
+        #if canImport(AppKit)
+        // 현재 창의 앱들에 대해 캐시를 보강 (아직 캐시 미생성 앱이 있을 수 있음)
+        let windows = WindowManager.listWindows()
+        _ = IconExtractor.extractIcons(from: windows, cache: iconCache)
+
+        let iconsResponse = iconCache.toResponse()
+        guard !iconsResponse.icons.isEmpty else {
+            print("[INFO] No cached icons to snapshot for new client")
+            return
+        }
+
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        guard let data = try? encoder.encode(iconsResponse),
+              let json = String(data: data, encoding: .utf8) else {
+            print("[ERROR] Failed to encode icon snapshot")
+            return
+        }
+
+        print("[INFO] Sending full icon snapshot (\(iconsResponse.icons.count) apps) to new client")
+        session.writeText(json)
+        #endif
     }
 
     private func handleDisconnect(session: WebSocketSession) {

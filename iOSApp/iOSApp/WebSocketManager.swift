@@ -429,6 +429,20 @@ final class WebSocketManager: ObservableObject {
         connect(host: host, port: port)
     }
 
+    /// 새 호스트로 강제 재연결 (QR 스캔/수동 입력 시 호출)
+    /// 진행 중인 연결/재연결을 동기적으로 정리하고 새 호스트로 즉시 연결한다.
+    /// 기존 connect()는 .connecting/.connected 상태에서 가드로 빠져나가므로
+    /// 호스트 변경 시에는 반드시 이 메서드를 사용해야 한다.
+    func reconnect(host: String, port: UInt16 = wsDefaultPort) {
+        cleanupConnection()
+        stopReconnectTimer()
+        reconnectAttempts = 0
+        // 상태를 동기적으로 .disconnected로 만들어 connect()의 가드를 통과시킨다
+        connectionState = .disconnected
+        isManualDisconnect = false
+        connect(host: host, port: port)
+    }
+
     // MARK: - Heartbeat (Spec-05 §4, §5)
 
     /// ping/pong 하트비트 시작 (wsHeartbeatInterval초 간격)

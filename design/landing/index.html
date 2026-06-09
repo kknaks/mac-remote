@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DeskDeck — iPhone을 Mac 리모컨으로</title>
+<style>
+  :root{
+    --bg:#06080a;
+    --bg-2:#0d1013;
+    --surface:#101316;
+    --surface-2:#16191d;
+    --line:rgba(255,255,255,.08);
+    --line-strong:rgba(255,255,255,.14);
+    --text:#f4f6f6;
+    --muted:rgba(244,246,246,.62);
+    --faint:rgba(244,246,246,.40);
+    --accent:#5EEAD4;
+    --accent-deep:#14B8A6;
+    --accent-soft:rgba(94,234,212,.12);
+    --radius:18px;
+    --maxw:1080px;
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",system-ui,"Segoe UI",sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;background:var(--bg);color:var(--text);font-family:var(--font);
+    -webkit-font-smoothing:antialiased;line-height:1.5;overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none;}
+  section{scroll-margin-top:84px;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
+  .eyebrow{
+    font-size:12.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;
+    color:var(--accent);display:inline-flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);}
+
+  /* ---------- app logo (real app icon PNG) ---------- */
+  .logo{
+    --s:40px;width:var(--s);height:var(--s);flex:none;display:block;
+    border-radius:calc(var(--s)*.2237);
+    box-shadow:0 6px 18px rgba(0,0,0,.45);
+  }
+
+  /* ---------- nav ---------- */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(6,8,10,.72);backdrop-filter:blur(18px) saturate(160%);
+    border-bottom:1px solid var(--line);
+  }
+  nav{display:flex;align-items:center;gap:18px;height:64px;}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:650;font-size:17px;letter-spacing:-.2px;}
+  .navlinks{display:flex;gap:26px;margin-left:auto;font-size:14px;color:var(--muted);}
+  .navlinks a:hover{color:var(--text);}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:9px;
+    padding:11px 18px;border-radius:11px;font-weight:600;font-size:14.5px;
+    border:1px solid transparent;cursor:pointer;transition:transform .12s ease,box-shadow .12s ease,background .12s ease;white-space:nowrap;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn-primary{
+    background:linear-gradient(180deg,var(--accent) 0%,var(--accent-deep) 100%);
+    color:#052e28;box-shadow:0 8px 26px rgba(94,234,212,.28),inset 0 1px 0 rgba(255,255,255,.4);
+  }
+  .btn-primary:hover{box-shadow:0 12px 34px rgba(94,234,212,.4),inset 0 1px 0 rgba(255,255,255,.4);}
+  .btn-ghost{background:var(--surface-2);color:var(--text);border-color:var(--line-strong);}
+  .btn-ghost:hover{background:#1f2329;}
+  .btn-sm{padding:8px 15px;font-size:13.5px;border-radius:10px;}
+  .btn[data-pending="1"]{opacity:.55;cursor:not-allowed;transform:none;}
+  .btn .sub{font-size:11px;font-weight:500;opacity:.72;display:block;line-height:1;margin-top:2px;}
+  .navlinks-mobile{display:none;}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;padding:74px 0 40px;overflow:hidden;}
+  .hero::before{
+    content:"";position:absolute;top:-280px;left:50%;transform:translateX(-50%);
+    width:1100px;height:760px;border-radius:50%;
+    background:radial-gradient(circle,rgba(94,234,212,.16),transparent 62%);
+    filter:blur(40px);pointer-events:none;
+  }
+  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;position:relative;}
+  .hero h1{
+    font-size:clamp(40px,5.6vw,64px);font-weight:800;line-height:1.04;letter-spacing:-2px;
+    margin:20px 0 0;text-wrap:balance;
+  }
+  .hero p.lead{font-size:18.5px;color:var(--muted);margin:20px 0 0;max-width:30em;text-wrap:pretty;}
+  .hero-cta{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap;}
+  .hero-meta{margin-top:18px;font-size:13px;color:var(--faint);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .dotsep{width:3px;height:3px;border-radius:50%;background:var(--faint);}
+
+  /* hero visual */
+  .stage{position:relative;display:flex;justify-content:center;align-items:flex-end;min-height:520px;}
+  .phone{
+    width:288px;aspect-ratio:430/932;border-radius:46px;padding:11px;background:#0a0a0c;
+    box-shadow:0 40px 90px rgba(0,0,0,.65),inset 0 0 0 2px #26292e,inset 0 0 0 4px #0a0a0c;
+    position:relative;z-index:2;
+  }
+  .phone>img{width:100%;height:100%;object-fit:cover;border-radius:36px;display:block;}
+  .macwin{
+    position:absolute;right:-18px;bottom:36px;z-index:3;width:232px;
+    border-radius:13px;overflow:hidden;background:#1c1c1e;border:1px solid var(--line-strong);
+    box-shadow:0 28px 60px rgba(0,0,0,.6);transform:rotate(4deg);
+  }
+  .macbar{height:28px;background:#2c2c2e;display:flex;align-items:center;gap:7px;padding:0 11px;border-bottom:1px solid rgba(0,0,0,.4);}
+  .macbar .dot{width:10px;height:10px;border-radius:50%;}
+  .macbar .ttl{flex:1;text-align:center;font-size:11px;color:rgba(255,255,255,.5);margin-right:34px;}
+  .macwin>img{width:100%;display:block;}
+
+  /* ---------- generic section ---------- */
+  .sec{padding:84px 0;border-top:1px solid var(--line);}
+  .sec-head{max-width:40em;margin-bottom:40px;}
+  .sec-head h2{font-size:clamp(28px,3.6vw,40px);font-weight:780;letter-spacing:-1px;margin:14px 0 0;line-height:1.08;}
+  .sec-head p{font-size:16.5px;color:var(--muted);margin:14px 0 0;text-wrap:pretty;}
+
+  /* download cards */
+  .dl-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  .card{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:26px;position:relative;
+  }
+  .card.featured{border-color:rgba(94,234,212,.32);background:linear-gradient(180deg,rgba(94,234,212,.05),rgba(94,234,212,0) 60%),var(--surface);}
+  .tag{
+    display:inline-block;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+    padding:4px 9px;border-radius:7px;background:var(--accent-soft);color:var(--accent);margin-bottom:14px;
+  }
+  .tag.req{background:rgba(94,234,212,.16);}
+  .card h3{font-size:21px;font-weight:700;margin:0;letter-spacing:-.3px;}
+  .card .platline{font-size:13px;color:var(--faint);margin-top:6px;font-family:var(--mono);}
+  .card p.desc{font-size:14.5px;color:var(--muted);margin:14px 0 22px;text-wrap:pretty;min-height:42px;}
+  .card .btn{width:100%;}
+
+  .reviewer{
+    margin-top:18px;display:flex;gap:13px;align-items:flex-start;
+    background:var(--bg-2);border:1px dashed var(--line-strong);border-radius:14px;padding:16px 18px;
+  }
+  .reviewer .badge{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--accent);flex:none;margin-top:1px;}
+  .reviewer p{margin:0;font-size:13.5px;color:var(--muted);line-height:1.55;}
+
+  /* install steps inline */
+  .steps{margin-top:30px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .step{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;}
+  .step .n{
+    width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
+    background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:14px;font-family:var(--mono);margin-bottom:14px;
+  }
+  .step h4{margin:0 0 6px;font-size:15.5px;font-weight:650;letter-spacing:-.2px;}
+  .step p{margin:0;font-size:13.5px;color:var(--muted);line-height:1.55;}
+  .step code{font-family:var(--mono);font-size:12.5px;background:rgba(255,255,255,.06);padding:1px 5px;border-radius:5px;color:var(--text);}
+
+  /* how-it-works */
+  .how-grid{display:grid;grid-template-columns:1fr 360px;gap:48px;align-items:center;}
+  .flow{display:flex;flex-direction:column;gap:6px;}
+  .flow-item{display:flex;gap:18px;padding:18px 0;border-bottom:1px solid var(--line);}
+  .flow-item:last-child{border-bottom:none;}
+  .flow-n{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--accent);flex:none;width:28px;padding-top:2px;}
+  .flow-b h4{margin:0 0 4px;font-size:17px;font-weight:650;letter-spacing:-.3px;}
+  .flow-b p{margin:0;font-size:14.5px;color:var(--muted);}
+  .qr-card{justify-self:center;}
+
+  /* features */
+  .feat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
+  .feat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:26px;}
+  .feat .ic{
+    width:42px;height:42px;border-radius:12px;display:grid;place-items:center;margin-bottom:16px;
+    background:var(--accent-soft);border:1px solid rgba(94,234,212,.22);color:var(--accent);
+  }
+  .feat .ic svg{width:21px;height:21px;}
+  .feat h3{margin:0 0 8px;font-size:18px;font-weight:680;letter-spacing:-.3px;}
+  .feat p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.6;text-wrap:pretty;}
+
+  /* support / faq */
+  .faq{display:grid;grid-template-columns:1fr 1fr;gap:14px 22px;}
+  details.qa{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:0 20px;}
+  details.qa summary{
+    list-style:none;cursor:pointer;padding:18px 0;font-size:16px;font-weight:600;letter-spacing:-.2px;
+    display:flex;align-items:center;gap:12px;
+  }
+  details.qa summary::-webkit-details-marker{display:none;}
+  details.qa summary .chev{margin-left:auto;color:var(--faint);transition:transform .2s ease;}
+  details.qa[open] summary .chev{transform:rotate(90deg);}
+  details.qa .body{padding:0 0 20px;font-size:14.5px;color:var(--muted);line-height:1.65;}
+  details.qa .body ul{margin:0;padding-left:18px;}
+  details.qa .body li{margin:5px 0;}
+  details.qa .body code{font-family:var(--mono);font-size:12.5px;background:rgba(255,255,255,.06);padding:1px 5px;border-radius:5px;color:var(--text);}
+
+  /* privacy */
+  .privacy-wrap{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:34px;}
+  .privacy-cols{display:grid;grid-template-columns:1fr 1fr;gap:40px;}
+  .privacy-cols h3{font-size:18px;font-weight:680;margin:0 0 4px;letter-spacing:-.3px;}
+  .privacy-cols .upd{font-size:12.5px;color:var(--faint);font-family:var(--mono);margin-bottom:18px;}
+  .privacy-cols .intro{font-size:15px;color:var(--text);margin:0 0 18px;}
+  .privacy-cols .intro b{color:var(--accent);}
+  .plist{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:14px;}
+  .plist li{font-size:14px;color:var(--muted);line-height:1.55;padding-left:22px;position:relative;}
+  .plist li::before{content:"";position:absolute;left:0;top:7px;width:9px;height:9px;border-radius:3px;background:var(--accent-soft);border:1px solid var(--accent);}
+  .plist li b{color:var(--text);font-weight:650;}
+
+  /* footer */
+  footer{border-top:1px solid var(--line);padding:48px 0 60px;}
+  .foot-grid{display:flex;justify-content:space-between;gap:32px;flex-wrap:wrap;align-items:flex-start;}
+  .foot-brand{display:flex;align-items:center;gap:11px;font-weight:650;font-size:16px;}
+  .foot-meta{font-size:13.5px;color:var(--faint);margin-top:12px;max-width:30em;line-height:1.6;}
+  .foot-links{display:flex;flex-direction:column;gap:9px;font-size:14px;color:var(--muted);}
+  .foot-links a:hover{color:var(--text);}
+  .foot-links .h{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--faint);margin-bottom:4px;}
+  .mailto{color:var(--accent);font-weight:550;}
+  .copy{margin-top:36px;font-size:12.5px;color:var(--faint);border-top:1px solid var(--line);padding-top:22px;}
+
+  /* responsive */
+  @media (max-width:920px){
+    .hero-grid{grid-template-columns:1fr;gap:8px;}
+    .stage{min-height:auto;margin-top:24px;order:2;}
+    .dl-grid,.feat-grid,.faq,.privacy-cols{grid-template-columns:1fr;}
+    .how-grid{grid-template-columns:1fr;gap:36px;}
+    .qr-card{order:-1;}
+    .steps{grid-template-columns:1fr;}
+    .navlinks{display:none;}
+  }
+  @media (max-width:560px){
+    .hero-cta{flex-direction:column;}
+    .hero-cta .btn{width:100%;}
+    .foot-grid{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ======================= NAV ======================= -->
+<header>
+  <div class="wrap">
+    <nav>
+      <a class="brand" href="#top">
+        <img class="logo" src="assets/AppIcon-128.png" alt="DeskDeck 앱 아이콘" />
+        DeskDeck
+      </a>
+      <div class="navlinks">
+        <a href="#download">다운로드</a>
+        <a href="#how">작동 방식</a>
+        <a href="#features">특징</a>
+        <a href="#support">지원</a>
+        <a href="#privacy">개인정보</a>
+      </div>
+      <a class="btn btn-primary btn-sm" id="nav-appstore" href="#download">App Store</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ======================= HERO ======================= -->
+<span id="top"></span>
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">iPhone × Mac · 로컬 네트워크 리모컨</span>
+        <h1>내 Mac을<br />손바닥 위에서.</h1>
+        <p class="lead">iPhone으로 열려 있는 Mac 창을 탭 한 번에 전환하고, 자주 쓰는 단축키를 버튼으로 실행하세요. 같은 Wi‑Fi만 있으면 됩니다 — 계정도, 클라우드도 없이.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" id="hero-appstore" href="#download">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.9c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.8-3.5.8-.7 0-1.8-.8-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-1.1 2.8-2.2c.9-1.3 1.2-2.5 1.3-2.6-.1 0-2.5-.9-2.5-3.6zM14.1 5.7c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.8 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.8-1.3z"/></svg>
+            App Store에서 받기
+          </a>
+          <a class="btn btn-ghost" id="hero-dmg" href="#download">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+            Mac 헬퍼 .dmg
+          </a>
+        </div>
+        <div class="hero-meta">
+          <span>iPhone 앱 + Mac 헬퍼(무료)</span><span class="dotsep"></span>
+          <span>macOS 14+</span><span class="dotsep"></span>
+          <span>계정·수집 없음</span>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="phone">
+          <img src="assets/01-windows.png" alt="DeskDeck 창 목록 화면" draggable="false" />
+        </div>
+        <div class="macwin">
+          <div class="macbar">
+            <span class="dot" style="background:#ff5f57"></span>
+            <span class="dot" style="background:#febc2e"></span>
+            <span class="dot" style="background:#28c840"></span>
+            <span class="ttl">DeskDeckHelper</span>
+          </div>
+          <img src="assets/04-mac-qr.png" alt="Mac 헬퍼 QR 페어링 창" draggable="false" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= DOWNLOAD ======================= -->
+<section class="sec" id="download">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Download</span>
+      <h2>두 개를 받으면 끝</h2>
+      <p>iPhone 앱과 Mac 헬퍼는 한 쌍입니다. 같은 Wi‑Fi에 있는 iPhone과 Mac을 직접 연결합니다.</p>
+    </div>
+
+    <div class="dl-grid">
+      <div class="card">
+        <span class="tag">iPhone 앱</span>
+        <h3>DeskDeck</h3>
+        <div class="platline">iOS 16+ · iPhone</div>
+        <p class="desc">손안의 리모컨. 창 목록과 매크로를 한 화면에서.</p>
+        <a class="btn btn-primary" id="card-appstore" href="#">App Store에서 받기</a>
+      </div>
+
+      <div class="card featured">
+        <span class="tag req">Mac 헬퍼 · 필수</span>
+        <h3>DeskDeckHelper</h3>
+        <div class="platline">macOS 14+ · .dmg · 무료</div>
+        <p class="desc">iPhone 앱이 동작하려면 <b style="color:var(--text)">반드시</b> Mac에 설치·실행되어 있어야 합니다.</p>
+        <a class="btn btn-primary" id="card-dmg" href="#">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+          DeskDeckHelper 다운로드
+        </a>
+      </div>
+    </div>
+
+    <div class="reviewer">
+      <span class="badge">For reviewers</span>
+      <p>This iPhone app requires the free <b style="color:var(--text)">DeskDeckHelper</b> Mac app, downloadable above. The iPhone and Mac must be on the same Wi‑Fi network. Pair by scanning the QR code shown in the DeskDeckHelper menu‑bar item — no account or login is required.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="n">1</div>
+        <h4>설치</h4>
+        <p>DMG를 열고 <code>DeskDeckHelper</code>을 응용 프로그램으로 드래그합니다.</p>
+      </div>
+      <div class="step">
+        <div class="n">2</div>
+        <h4>첫 실행</h4>
+        <p>아이콘을 <b style="color:var(--text)">우클릭 → 열기</b>. "확인되지 않은 개발자" 경고가 뜨면 한 번만 열기.</p>
+      </div>
+      <div class="step">
+        <div class="n">3</div>
+        <h4>권한 허용</h4>
+        <p>시스템 설정 → 개인정보 보호 및 보안에서 <b style="color:var(--text)">손쉬운 사용</b>과 <b style="color:var(--text)">화면 기록</b>을 체크.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= HOW IT WORKS ======================= -->
+<section class="sec" id="how">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">How it works</span>
+      <h2>QR 한 번이면 연결</h2>
+      <p>메뉴바에서 QR을 띄우고, 폰으로 스캔. 회사 Wi‑Fi가 기기 간 통신을 막으면 IP 직접 입력도 됩니다.</p>
+    </div>
+    <div class="how-grid">
+      <div class="flow">
+        <div class="flow-item">
+          <span class="flow-n">01</span>
+          <div class="flow-b"><h4>DeskDeckHelper 실행</h4><p>Mac 메뉴바에 아이콘이 나타납니다.</p></div>
+        </div>
+        <div class="flow-item">
+          <span class="flow-n">02</span>
+          <div class="flow-b"><h4>QR 코드 열기</h4><p>메뉴바 아이콘을 눌러 페어링 QR을 띄웁니다.</p></div>
+        </div>
+        <div class="flow-item">
+          <span class="flow-n">03</span>
+          <div class="flow-b"><h4>iPhone으로 스캔</h4><p>DeskDeck에서 QR을 스캔하면 즉시 연결됩니다.</p></div>
+        </div>
+        <div class="flow-item">
+          <span class="flow-n">04</span>
+          <div class="flow-b"><h4>제어 시작</h4><p>창 목록 탭에서 창 전환, 매크로 탭에서 단축키 실행.</p></div>
+        </div>
+      </div>
+      <div class="macwin qr-card" style="position:static;transform:none;width:300px;">
+        <div class="macbar">
+          <span class="dot" style="background:#ff5f57"></span>
+          <span class="dot" style="background:#febc2e"></span>
+          <span class="dot" style="background:#28c840"></span>
+          <span class="ttl">DeskDeckHelper — 페어링</span>
+        </div>
+        <img src="assets/04-mac-qr.png" alt="QR 코드 페어링 창" draggable="false" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= FEATURES ======================= -->
+<section class="sec" id="features">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Features</span>
+      <h2>가볍고, 조용하고, 로컬</h2>
+    </div>
+    <div class="feat-grid">
+      <div class="feat">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18M8 4v5"/></svg></div>
+        <h3>창 전환</h3>
+        <p>열려 있는 Mac 창이 그대로 목록에 — 탭 한 번으로 원하는 창을 앞으로 가져옵니다.</p>
+      </div>
+      <div class="feat">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M8 14h8"/></svg></div>
+        <h3>매크로 버튼</h3>
+        <p>⌘C·⌘V·스크린샷·화면잠금 같은 단축키를 큰 버튼으로. Hold 모드와 직접 추가도 지원합니다.</p>
+      </div>
+      <div class="feat">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></div>
+        <h3>로컬 전용</h3>
+        <p>화면 캡처나 전송이 없습니다. 앱 아이콘만 표시되고, 모든 통신은 같은 Wi‑Fi 안에서만 흐릅니다.</p>
+      </div>
+      <div class="feat">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <h3>수집 없음</h3>
+        <p>계정 가입, 데이터 수집, 광고, 추적 모두 없습니다. 페어링 정보와 매크로는 기기 안에만 남습니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= SUPPORT / FAQ ======================= -->
+<section class="sec" id="support">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Support</span>
+      <h2>문제가 생기면</h2>
+      <p>대부분의 연결 문제는 Wi‑Fi와 Mac 권한 두 가지에서 옵니다.</p>
+    </div>
+    <div class="faq">
+      <details class="qa" open>
+        <summary>연결이 안 돼요<span class="chev">›</span></summary>
+        <div class="body">
+          <ul>
+            <li>iPhone과 Mac이 <b style="color:var(--text)">같은 Wi‑Fi</b>에 있는지 확인하세요.</li>
+            <li>회사·공용 Wi‑Fi는 기기 간 통신을 막기도 합니다(client isolation). Mac의 <code>인터넷 공유</code>로 핫스팟을 만들어 iPhone을 직접 연결하면 해결됩니다.</li>
+            <li>iPhone 설정 → DeskDeck → <b style="color:var(--text)">로컬 네트워크</b>가 허용돼 있는지 확인하세요.</li>
+          </ul>
+        </div>
+      </details>
+      <details class="qa">
+        <summary>창 제목이 안 보여요<span class="chev">›</span></summary>
+        <div class="body">Mac 시스템 설정 → 개인정보 보호 및 보안 → <b style="color:var(--text)">화면 기록</b>에서 DeskDeckHelper를 허용하세요. (창 제목 표시에만 사용됩니다.)</div>
+      </details>
+      <details class="qa">
+        <summary>창 전환·키 입력이 안 돼요<span class="chev">›</span></summary>
+        <div class="body">Mac 시스템 설정 → 개인정보 보호 및 보안 → <b style="color:var(--text)">손쉬운 사용</b>에서 DeskDeckHelper를 허용하세요.</div>
+      </details>
+      <details class="qa">
+        <summary>무엇이 필요한가요?<span class="chev">›</span></summary>
+        <div class="body">같은 Wi‑Fi에 있는 Mac, Mac에 설치·실행한 무료 헬퍼 <b style="color:var(--text)">DeskDeckHelper</b>(메뉴바 앱), 그리고 동일한 Wi‑Fi에 연결된 iPhone입니다.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= PRIVACY ======================= -->
+<section class="sec" id="privacy">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Privacy</span>
+      <h2>개인정보 처리방침</h2>
+      <p>DeskDeck는 어떤 개인정보도 수집하지 않습니다. App Store Connect의 개인정보 라벨은 <b style="color:var(--text)">Data Not Collected</b>입니다.</p>
+    </div>
+    <div class="privacy-wrap">
+      <div class="privacy-cols">
+        <div>
+          <h3>한국어</h3>
+          <div class="upd">최종 업데이트 · 2026‑06‑01</div>
+          <p class="intro">DeskDeck(이하 "앱")는 사용자의 개인정보를 <b>수집하지 않습니다.</b></p>
+          <ul class="plist">
+            <li><b>데이터 수집 없음</b> — 어떠한 개인정보도 수집·저장·전송하지 않습니다.</li>
+            <li><b>로컬 동작</b> — 모든 통신은 같은 Wi‑Fi의 iPhone과 Mac 사이에서만 이뤄지며, 개발자나 제3자 서버로 전송되지 않습니다.</li>
+            <li><b>기기 내 저장</b> — 페어링 정보(Mac 주소·포트)와 사용자가 만든 매크로는 iPhone 안에만 저장됩니다.</li>
+            <li><b>카메라</b> — QR 코드 스캔에만 사용되며, 촬영 내용은 저장·전송되지 않습니다.</li>
+            <li><b>로컬 네트워크</b> — 같은 Wi‑Fi의 Mac에 연결하기 위해서만 사용됩니다.</li>
+            <li><b>분석·광고·추적 없음</b> — 분석 도구, 광고, 추적 기술을 사용하지 않습니다.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>English</h3>
+          <div class="upd">Last updated · 2026‑06‑01</div>
+          <p class="intro">DeskDeck ("the app") <b>does not collect any personal data.</b></p>
+          <ul class="plist">
+            <li><b>No data collection</b> — The app does not collect, store, or transmit any personal data.</li>
+            <li><b>Local‑only operation</b> — All communication happens only between your iPhone and your Mac on the same Wi‑Fi. Nothing is sent to the developer or any third party.</li>
+            <li><b>On‑device storage</b> — Pairing info (Mac address/port) and your custom macros are stored only on your iPhone.</li>
+            <li><b>Camera</b> — Used solely to scan a QR code; captured images are not stored or transmitted.</li>
+            <li><b>Local network</b> — Used solely to connect to your Mac on the same Wi‑Fi.</li>
+            <li><b>No analytics, ads, or tracking</b> — The app uses no analytics, advertising, or tracking technologies.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= FOOTER ======================= -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">
+          <img class="logo" style="--s:34px" src="assets/AppIcon-128.png" alt="DeskDeck 앱 아이콘" />
+          DeskDeck
+        </div>
+        <p class="foot-meta">iPhone을 Mac 리모컨으로. 같은 Wi‑Fi 위에서 창을 전환하고 단축키를 실행하세요. 계정도 클라우드도 없습니다.</p>
+        <p class="foot-meta">문의 · <a class="mailto" href="mailto:kknaks@medisolveai.com">kknaks@medisolveai.com</a></p>
+      </div>
+      <div class="foot-links">
+        <span class="h">바로가기</span>
+        <a href="#download">다운로드</a>
+        <a href="#how">작동 방식</a>
+        <a href="#support">지원 / FAQ</a>
+        <a href="#privacy">개인정보 처리방침</a>
+      </div>
+    </div>
+    <div class="copy">© 2026 DeskDeck · profile.kknaks.cloud/macremote · macOS 14+ / iOS 16+</div>
+  </div>
+</footer>
+
+<!-- ======================= URL CONFIG =======================
+     출시 후 아래 두 URL만 채우면 모든 다운로드 버튼이 연결됩니다.
+     비워두면 버튼이 "준비 중" 상태로 표시됩니다.
+-->
+<script>
+  const CONFIG = {
+    APP_STORE_URL: "",   // 예: https://apps.apple.com/app/id0000000000
+    DMG_URL: ""          // 예: https://github.com/kknaks/macremote/releases/latest/download/MacHelper.dmg  (GitHub Releases 권장)
+  };
+
+  (function () {
+    function wire(ids, url, pendingLabel) {
+      ids.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        if (url) {
+          el.setAttribute("href", url);
+          if (id.indexOf("dmg") < 0) el.setAttribute("target", "_blank"), el.setAttribute("rel", "noopener");
+          el.removeAttribute("data-pending");
+        } else {
+          el.setAttribute("href", "#download");
+          el.setAttribute("data-pending", "1");
+          el.setAttribute("title", pendingLabel + " URL을 CONFIG에 채워주세요");
+        }
+      });
+    }
+    wire(["nav-appstore", "hero-appstore", "card-appstore"], CONFIG.APP_STORE_URL, "App Store");
+    wire(["hero-dmg", "card-dmg"], CONFIG.DMG_URL, "DMG");
+  })();
+</script>
+</body>
+</html>

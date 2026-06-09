@@ -19,6 +19,8 @@ Mac 헬퍼(실행기) + iOS 앱(리모컨), WebSocket(JSON) 통신.
 | 작업 계획 (인덱스) | `doc/Work.md` | 워크 간 관계 + 스펙 커버리지 + 작업 현황 |
 | 작업 계획 (상세) | `doc/work/Work-NN-slug.md` | 태스크 분해, 커밋 추적, 검증 방법 |
 | 아키텍처 | `doc/Architecture.md` | 기술 스택 ↔ 시스템 구조, 엔티티 맵, 디렉토리 구조 |
+| 릴리즈 노트 | `doc/Releases.md` | 버전별 수정/변경 이력 (사용자 관점 + 변경 파일) |
+| 배포 런북 | `doc/runbook/*.md` | 배포 절차 (Mac DMG, iOS TestFlight) |
 | 템플릿 | `doc/templates/*.tpl.md` | 각 문서의 원본 양식 |
 
 ---
